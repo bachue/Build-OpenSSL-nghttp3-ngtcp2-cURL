@@ -503,7 +503,7 @@ typedef int (*SSL_verify_cb)(int preverify_ok, X509_STORE_CTX *x509_ctx);
  * - OpenSSL 1.0.1 series
  * - OpenSSL 1.0.2 series
  * - OpenSSL 1.1.0 series
- * - OpenSSL 1.1.1 and 1.1.1a
+ * - OpenSSL 1.1.1 and 3.0.7
  */
 # define SSL_MODE_DTLS_SCTP_LABEL_LENGTH_BUG 0x00000400U
 

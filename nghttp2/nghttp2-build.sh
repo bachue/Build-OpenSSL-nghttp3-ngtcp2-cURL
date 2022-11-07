@@ -1,18 +1,18 @@
 #!/bin/bash
-# This script downlaods and builds the Mac, iOS and tvOS nghttp2 libraries 
+# This script downlaods and builds the Mac, iOS and tvOS nghttp2 libraries
 #
 # Credits:
 # Jason Cox, @jasonacox
-#   https://github.com/jasonacox/Build-OpenSSL-cURL 
+#   https://github.com/jasonacox/Build-OpenSSL-cURL
 #
 # NGHTTP2 - https://github.com/nghttp2/nghttp2
 #
 
-# > nghttp2 is an implementation of HTTP/2 and its header 
+# > nghttp2 is an implementation of HTTP/2 and its header
 # > compression algorithm HPACK in C
-# 
+#
 # NOTE: pkg-config is required
- 
+
 set -e
 
 # Formatting
@@ -37,7 +37,7 @@ trap 'echo -e "${alert}** ERROR with Build - Check /tmp/nghttp2*.log${alertdim}"
 NGHTTP2_VERNUM="1.41.0"
 
 # Set defaults
-VERSION="1.1.1i"				# OpenSSL version default
+VERSION="3.0.7"				# OpenSSL version default
 catalyst="0"
 
 # Set minimum OS versions for target
@@ -75,7 +75,7 @@ usage ()
 	echo "         -m   compile Mac Catalyst library"
 	echo "         -u   Mac Catalyst iOS min target version (default $CATALYST_IOS)"
 	echo "         -x   disable color output"
-	echo "         -h   show usage"	
+	echo "         -h   show usage"
 	echo
 	trap - INT TERM EXIT
 	exit 127
@@ -165,7 +165,7 @@ else
 		echo -e "${alert}** FATAL ERROR: pkg-config failed to install - exiting.${normal}"
 		exit 1
 	fi
-fi 
+fi
 
 buildMac()
 {
@@ -196,7 +196,7 @@ buildMac()
 		TARGET="darwin64-arm64-cc"
 		MACOS_VER="${MACOS_ARM64_VERSION}"
 		if [ ${BUILD_MACHINE} == 'arm64' ]; then
-   			# Apple ARM Silicon Build Machine Detected 
+   			# Apple ARM Silicon Build Machine Detected
 			export CFLAGS=" -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode"
 		else
 			# Apple x86_64 Build Machine Detected - cross compile
@@ -293,7 +293,7 @@ buildCatalyst()
 	else
 		./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP2}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP2_VERSION}-catalyst-${ARCH}.log"
 	fi
-	
+
 	make -j${CORES} >> "/tmp/${NGHTTP2_VERSION}-catalyst-${ARCH}.log" 2>&1
 	make install >> "/tmp/${NGHTTP2_VERSION}-catalyst-${ARCH}.log" 2>&1
 	make clean >> "/tmp/${NGHTTP2_VERSION}-catalyst-${ARCH}.log" 2>&1
@@ -314,7 +314,7 @@ buildIOS()
 
 	pushd . > /dev/null
 	cd "${NGHTTP2_VERSION}"
-  
+
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="iPhoneSimulator"
 	else
@@ -326,7 +326,7 @@ buildIOS()
         else
                 CC_BITCODE_FLAG="-fembed-bitcode"
         fi
-  
+
 	export $PLATFORM
 	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
@@ -334,7 +334,7 @@ buildIOS()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} ${CC_BITCODE_FLAG}"
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
-   
+
 	echo -e "${subbold}Building ${NGHTTP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
 		./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP2}/iOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
@@ -362,7 +362,7 @@ buildIOSsim()
 
 	pushd . > /dev/null
 	cd "${NGHTTP2_VERSION}"
-  
+
   	PLATFORM="iPhoneSimulator"
 	export $PLATFORM
 
@@ -380,7 +380,7 @@ buildIOSsim()
 	else
 			CC_BITCODE_FLAG="-fembed-bitcode"
 	fi
-  
+
 	export $PLATFORM
 	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
@@ -388,7 +388,7 @@ buildIOSsim()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${MIPHONEOS} ${CC_BITCODE_FLAG} ${RUNTARGET}  "
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
-   
+
 	echo -e "${subbold}Building ${NGHTTP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
 	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP2}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
@@ -415,7 +415,7 @@ buildTVOS()
 
 	pushd . > /dev/null
 	cd "${NGHTTP2_VERSION}"
-  
+
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="AppleTVSimulator"
 	else
@@ -430,7 +430,7 @@ buildTVOS()
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode"
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} ${NGHTTP2LIB}"
 	export LC_CTYPE=C
-  
+
 	echo -e "${subbold}Building ${NGHTTP2_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS ${TVOS_MIN_SDK_VERSION})"
 
 	# Patch apps/speed.c to not use fork() since it's not available on tvOS
@@ -439,7 +439,7 @@ buildTVOS()
 	# Patch Configure to build for tvOS, not iOS
 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	# chmod u+x ./Configure
-	
+
 	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP2}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP2_VERSION}-tvOS-${ARCH}.log"
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
 

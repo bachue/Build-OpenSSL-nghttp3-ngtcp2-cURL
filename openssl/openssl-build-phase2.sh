@@ -38,7 +38,7 @@ IOS_SDK_VERSION=""
 TVOS_MIN_SDK_VERSION="9.0"
 TVOS_SDK_VERSION=""
 catalyst="0"
-VERSION="1.1.1i"				# OpenSSL version default
+VERSION="3.0.7"				# OpenSSL version default
 
 CORES=$(sysctl -n hw.ncpu)
 OPENSSL_VERSION="openssl-${VERSION}"
@@ -158,13 +158,13 @@ buildIOS()
 		if [[ $ARCH == "x86_64" ]]; then
 			TARGET="darwin64-x86_64-cc"
 		fi
-		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 			./Configure no-asm ${TARGET} -no-shared --prefix="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
 			./Configure no-asm ${TARGET} -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		fi
 	else
-		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 			# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
 			./Configure iphoneos-cross DSO_LDFLAGS=-fembed-bitcode --prefix="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
@@ -172,7 +172,7 @@ buildIOS()
 		fi
 	fi
 	# add -isysroot to CC=
-	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 		sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 	else
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
@@ -214,12 +214,12 @@ buildIOSsim()
 			# e.g. -target arm64-apple-ios11.0-simulator
 		#if [[ $ARCH == "arm64" ]]; then
 		#	if (( $(echo "${MIPHONEOS} < 11.0" |bc -l) )); then
-		#		MIPHONEOS="11.0"	# Min support for Apple Silicon is iOS 11.0 
+		#		MIPHONEOS="11.0"	# Min support for Apple Silicon is iOS 11.0
 		#	fi
 		#fi
 	fi
-	
-	# set up exports for build 
+
+	# set up exports for build
 	export CFLAGS=" -Os -miphoneos-version-min=${MIPHONEOS} -fembed-bitcode -arch ${ARCH} ${RUNTARGET} "
 	export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk "
 	export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk "
@@ -232,7 +232,7 @@ buildIOSsim()
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${PLATFORM} ${iOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${MIPHONEOS})"
 
 	# configure
-	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 		./Configure no-asm ${TARGET} -no-shared --prefix="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	else
 		./Configure no-asm ${TARGET} -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
@@ -240,7 +240,7 @@ buildIOSsim()
 
 	# add -isysroot to CC=
 	# no longer needed with exports
-	#if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+	#if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 	#	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 	#else
 	#	sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
@@ -292,7 +292,7 @@ else
 	echo "Using ${OPENSSL_VERSION}.tar.gz"
 fi
 
-if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]]; then
+if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 	echo "** Building OpenSSL 1.1.1 **"
 else
 	if [[ "$OPENSSL_VERSION" = "openssl-1.0."* ]]; then

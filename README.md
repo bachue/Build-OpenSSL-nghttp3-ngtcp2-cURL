@@ -8,20 +8,20 @@ This Script builds OpenSSL, nghttp2 and cURL/libcurl for MacOS (x86_64, arm64), 
 ## News
 
 * 13-Feb-2021: Update now builds XCFrameworks which supports all platforms and targets for easy import into your projects.
-* 16-Jan-2021: Updated build scripts to allow user defined minimum macOS, iOS, tvOS and catalyst target build versions. 
+* 16-Jan-2021: Updated build scripts to allow user defined minimum macOS, iOS, tvOS and catalyst target build versions.
 * 02-Jan-2021: Apple Silicon [Beta]: The script now builds OpenSSL, nghttp2 and libcurl libraries for MacOS arm64 targets, including iOS Simulator and Mac Catalyst. Script runs on Apple Silicon arm64 and Intel x86_64 build hosts. Not complete: tvOS Simulator.
 * 14-Sep-2020: Mac Catalyst: This now optionally builds libraries for [Mac Catalyst](https://developer.apple.com/mac-catalyst/)
 
 ## Build
 
-The `build.sh` script calls the three build scripts below (openssl, nghttp and curl) which download the specified release version, configure and build the libraries and binaries.  
+The `build.sh` script calls the three build scripts below (openssl, nghttp and curl) which download the specified release version, configure and build the libraries and binaries.
 
 The build script accepts several arguments to adjust versions and toggle features:
 
 ```
   ./build.sh [-o <OpenSSL version>] [-c <curl version>] [-n <nghttp2 version>] [-d] [-e] [-3] [-x] [-h] [...]
 
-         -o <version>   Build OpenSSL version (default 1.1.1o)
+         -o <version>   Build OpenSSL version (default 3.0.7)
          -c <version>   Build curl version (default 7.83.1)
          -n <version>   Build nghttp2 version (default 1.47.0)
          -d             Compile without HTTP2 support
@@ -59,10 +59,10 @@ cd Build-OpenSSL-cURL
 Default versions are specified in the `build.sh` script but you can specify the version you want to build via the command line, e.g.:
 
 ```bash
-./build.sh -o 1.1.1g -c 7.72.0 -n 1.41.0
+./build.sh -o 3.0.7 -c 7.72.0 -n 1.41.0
 
 # Use -m to build for Mac Catalyst as well
-./build.sh -o 1.1.1g -c 7.72.0 -n 1.41.0 -m
+./build.sh -o 3.0.7 -c 7.72.0 -n 1.41.0 -m
 ```
 
 You can update the default version by editing this section in the `build.sh` script:
@@ -72,7 +72,7 @@ You can update the default version by editing this section in the `build.sh` scr
 # EDIT this section to Select Default Versions #
 ################################################
 
-OPENSSL="1.1.1o"        # https://www.openssl.org/source/
+OPENSSL="3.0.7"        # https://www.openssl.org/source/
 LIBCURL="7.83.1"        # https://curl.haxx.se/download.html
 NGHTTP2="1.47.0"        # https://nghttp2.org/
 
@@ -95,7 +95,7 @@ The `openssl-build.sh` script creates separate bitcode enabled target libraries 
 
 By default, the OpenSSL source disables ENGINE support for iOS builds.  To force this active use `build.sh -e`
 
-The tvOS build has fork() disable as the AppleTV tvOS does not support fork(). 
+The tvOS build has fork() disable as the AppleTV tvOS does not support fork().
 
 	|____lib
 	   |____libcrypto.a
@@ -111,7 +111,7 @@ The `nghttp2-build.sh` script builds the nghttp2 libraries used by libcurl for t
 
 Edit `build.sh` to change the default version of nghttp2 that will be downloaded and built or specify the version on the command line.
 
-	build.sh -n 1.40.0 
+	build.sh -n 1.40.0
 
 Include the relevant library into your project. The pkg-config tool is required.  The build script tests for this and will attempt to install if it is missing. Rename the appropriate file to libnghttp2.a:
 
@@ -136,8 +136,8 @@ The `libcurl-build.sh` script create separate bitcode enabled targets libraries 
 The curl build uses `--with-ssl` pointing to the above OpenSSL builds and `--with-nghttp2` pointing to the above nghttp2 builds..
 Edit `build.sh` to change the version of cURL that will be downloaded and built or specify the version on the command line.
 
-	build.sh -c 7.68.0 
-	
+	build.sh -c 7.68.0
+
 Include the relevant library into your project.  Rename the appropriate file to libcurl.a:
 
 	|____lib
@@ -165,20 +165,20 @@ See the example 'iOS Test App'.
 
 ### Usage
 
- 1. Clone this Repo 
- 2. Run `build.sh` 
- 3. Headers, libraries and XCFrameworks are stored in the archives folder. 
+ 1. Clone this Repo
+ 2. Run `build.sh`
+ 3. Headers, libraries and XCFrameworks are stored in the archives folder.
  4. Copy the headers to your project.
- 5. Import appropriate "libssl.a", "libcrypto.a", "libcurl.a", "libnghttp2.a", or alternatively, you can copy the appropriate xcframework folder into your Xcode project. 
+ 5. Import appropriate "libssl.a", "libcrypto.a", "libcurl.a", "libnghttp2.a", or alternatively, you can copy the appropriate xcframework folder into your Xcode project.
  6. Reference Headers, "Headers/openssl", "Headers/curl".
  7. Specifying the flag  "-lz" in "Other Linker Flags" (OTHER_LDFLAGS) setting in the "Linking" section in the Build settings of the target.
  8. To use cURL, see below:
 
         #include <curl/curl.h>
 
-        - (void)foo {    
-            CURL* cURL = curl_easy_init();  
-            ...  
+        - (void)foo {
+            CURL* cURL = curl_easy_init();
+            ...
         }
 
 NOTE: You may need to edit the `curlbuild.h` header if you get an error similar to this: `'curl_rule_01' declared as an array with a negative size`
@@ -236,40 +236,40 @@ The Example app project builds an iOS, iOS Simulator and Mac Catalyst target.
 	xcrun -sdk iphoneos lipo -info curl/lib/*.a
 
 * Catalyst (Intel + Apple Silicon)
-	* openssl/Catalyst/lib/libcrypto.a are: x86_64 arm64 
-	* openssl/Catalyst/lib/libssl.a are: x86_64 arm64 
-	* nghttp2/lib/libnghttp2_Catalyst.a are: x86_64 arm64 
-	* curl/lib/libcurl_Catalyst.a are: x86_64 arm64 
+	* openssl/Catalyst/lib/libcrypto.a are: x86_64 arm64
+	* openssl/Catalyst/lib/libssl.a are: x86_64 arm64
+	* nghttp2/lib/libnghttp2_Catalyst.a are: x86_64 arm64
+	* curl/lib/libcurl_Catalyst.a are: x86_64 arm64
 
 * Mac (Intel + Apple Silicon)
-	* openssl/Mac/lib/libcrypto.a are: x86_64 arm64 
-	* openssl/Mac/lib/libssl.a are: x86_64 arm64 
-	* nghttp2/lib/libnghttp2_Mac.a are: x86_64 arm64 
-	* curl/lib/libcurl_Mac.a are: x86_64 arm64 
+	* openssl/Mac/lib/libcrypto.a are: x86_64 arm64
+	* openssl/Mac/lib/libssl.a are: x86_64 arm64
+	* nghttp2/lib/libnghttp2_Mac.a are: x86_64 arm64
+	* curl/lib/libcurl_Mac.a are: x86_64 arm64
 
 * iOS Only
-	* openssl/iOS/lib/libcrypto.a are: armv7 armv7s arm64 arm64e 
-	* openssl/iOS/lib/libssl.a are: armv7 armv7s arm64 arm64e 
-	* nghttp2/lib/libnghttp2_iOS.a are: armv7 armv7s arm64 arm64e 
-	* curl/lib/libcurl_iOS.a are: armv7 armv7s arm64 arm64e 
+	* openssl/iOS/lib/libcrypto.a are: armv7 armv7s arm64 arm64e
+	* openssl/iOS/lib/libssl.a are: armv7 armv7s arm64 arm64e
+	* nghttp2/lib/libnghttp2_iOS.a are: armv7 armv7s arm64 arm64e
+	* curl/lib/libcurl_iOS.a are: armv7 armv7s arm64 arm64e
 
 * iOS Simulator (Intel + Apple Silicon)
-	* openssl/iOS-simulator/lib/libcrypto.a are: i386 x86_64 arm64 
-	* openssl/iOS-simulator/lib/libssl.a are: i386 x86_64 arm64 
-	* nghttp2/lib/libnghttp2_iOS-simulator.a are: i386 x86_64 arm64 
-	* curl/lib/libcurl_iOS-simulator.a are: i386 x86_64 arm64 
+	* openssl/iOS-simulator/lib/libcrypto.a are: i386 x86_64 arm64
+	* openssl/iOS-simulator/lib/libssl.a are: i386 x86_64 arm64
+	* nghttp2/lib/libnghttp2_iOS-simulator.a are: i386 x86_64 arm64
+	* curl/lib/libcurl_iOS-simulator.a are: i386 x86_64 arm64
 
-* iOS + Intel Mac Simulator 
-	* openssl/iOS-fat/lib/libcrypto.a are: armv7 armv7s i386 x86_64 arm64 arm64e 
-	* openssl/iOS-fat/lib/libssl.a are: armv7 armv7s i386 x86_64 arm64 arm64e 
-	* nghttp2/lib/libnghttp2_iOS-fat.a are: armv7 armv7s i386 x86_64 arm64 arm64e 
-	* curl/lib/libcurl_iOS-fat.a are: armv7 armv7s i386 x86_64 arm64 arm64e 
+* iOS + Intel Mac Simulator
+	* openssl/iOS-fat/lib/libcrypto.a are: armv7 armv7s i386 x86_64 arm64 arm64e
+	* openssl/iOS-fat/lib/libssl.a are: armv7 armv7s i386 x86_64 arm64 arm64e
+	* nghttp2/lib/libnghttp2_iOS-fat.a are: armv7 armv7s i386 x86_64 arm64 arm64e
+	* curl/lib/libcurl_iOS-fat.a are: armv7 armv7s i386 x86_64 arm64 arm64e
 
 * tvOS + Intel Mac Simulator
-	* openssl/tvOS/lib/libcrypto.a are: x86_64 arm64 
-	* openssl/tvOS/lib/libssl.a are: x86_64 arm64 
-	* nghttp2/lib/libnghttp2_tvOS.a are: x86_64 arm64 
-	* curl/lib/libcurl_tvOS.a are: x86_64 arm64 
+	* openssl/tvOS/lib/libcrypto.a are: x86_64 arm64
+	* openssl/tvOS/lib/libssl.a are: x86_64 arm64
+	* nghttp2/lib/libnghttp2_tvOS.a are: x86_64 arm64
+	* curl/lib/libcurl_tvOS.a are: x86_64 arm64
 
 * Universal Mac Binaries
 	* curl: Mach-O universal binary with 2 architectures:
@@ -280,8 +280,8 @@ The Example app project builds an iOS, iOS Simulator and Mac Catalyst target.
 		* (for architecture arm64):  Mach-O 64-bit executable arm64
 
 * Consolidated OpenSSL Libraries for iOS
-	* openssl/openssl-ios-armv7_armv7s_arm64_arm64e.a are: armv7 armv7s arm64 arm64e 
-	* openssl/openssl-ios-x86_64-simulator.a are: i386 x86_64 
+	* openssl/openssl-ios-armv7_armv7s_arm64_arm64e.a are: armv7 armv7s arm64 arm64e
+	* openssl/openssl-ios-x86_64-simulator.a are: i386 x86_64
 	* openssl/openssl-ios-x86_64-maccatalyst.a is architecture: x86_64
 
 * XCFrameworks
@@ -314,7 +314,7 @@ The Example app project builds an iOS, iOS Simulator and Mac Catalyst target.
 
 The `build.sh` script will create an ./archive folder and store all the *.a libraries built along with the header files and a MacOS binaries for `curl` and `openssl`.
 
-        |___libcurl-7.66.0-openssl-1.1.1d-nghttp2-1.39.2
+        |___libcurl-7.66.0-openssl-3.0.7-nghttp2-1.39.2
              |
              |____cacert.pem
              |
@@ -393,7 +393,7 @@ The MIT License is used for this project.  See LICENSE file.
 
 The AppleTVOS curl build may fail due to a macports "ar" program being picked up (it was in the path - You will see a log message about /opt/local/bin/ar failing in the curl log). A quick cleanup of the path (so that the build uses /usr/bin/ar) fixed the problem.  - Thanks to Preston Jennings (prestonj) for this tip.
 
-If the `build.sh` script fails during iOS build phase with an error "C Compiler cannot create executables" this is likely due to not having a clean installation of the Xcode command line tools.  Launch Xcode and re-install the command line tools. 
+If the `build.sh` script fails during iOS build phase with an error "C Compiler cannot create executables" this is likely due to not having a clean installation of the Xcode command line tools.  Launch Xcode and re-install the command line tools.
 
 If you see "FATAL ERROR" during the nghttp2 build phase, this is likely due to not having 'pkg-config' tools installed.  Install manually or install 'brew' to have the script install it for you.
 
