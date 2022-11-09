@@ -383,10 +383,6 @@ echo "  Creating combined OpenSSL libraries for iOS"
 libtool -no_warning_for_no_symbols -static -o openssl-ios-armv7_armv7s_arm64_arm64e.a iOS/lib/libcrypto.a iOS/lib/libssl.a
 libtool -no_warning_for_no_symbols -static -o openssl-ios-i386_x86_64_arm64-simulator.a iOS-simulator/lib/libcrypto.a iOS-simulator/lib/libssl.a
 
-echo -e "${bold}Cleaning up${dim}"
-rm -rf /tmp/${OPENSSL_VERSION}-*
-rm -rf ${OPENSSL_VERSION}
-
 #reset trap
 trap - INT TERM EXIT
 

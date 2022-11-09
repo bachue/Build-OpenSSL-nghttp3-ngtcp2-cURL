@@ -551,10 +551,6 @@ if [ $catalyst == "1" ]; then
 	libtool -no_warning_for_no_symbols -static -o openssl-ios-x86_64-maccatalyst.a Catalyst/lib/libcrypto.a Catalyst/lib/libssl.a
 fi
 
-#echo -e "${bold}Cleaning up${dim}"
-rm -rf /tmp/${OPENSSL_VERSION}-*
-rm -rf ${OPENSSL_VERSION}
-
 #reset trap
 trap - INT TERM EXIT
 
