@@ -15,7 +15,8 @@ set -e
 
 OPENSSL="3.0.7+quic"	# https://www.openssl.org/source/
 LIBCURL="7.86.0"		# https://curl.haxx.se/download.html
-NGHTTP2="1.48.0"		# https://nghttp2.org/
+NGHTTP3="0.7.1"		    # https://nghttp2.org/nghttp3/
+NGTCP2="0.10.0"         # https://nghttp2.org/ngtcp2/
 
 ################################################
 
@@ -47,11 +48,10 @@ fi
 
 # Global flags
 engine=""
-buildnghttp2="-n"
+buildnghttp3="-n"
 disablebitcode=""
 colorflag=""
 catalyst=""
-sslv3=""
 
 # Formatting
 default="\033[39m"
@@ -73,17 +73,17 @@ usage ()
     echo
 	echo -e "${bold}Usage:${normal}"
 	echo
-	echo -e "  ${subbold}$0${normal} [-o ${dim}<OpenSSL version>${normal}] [-c ${dim}<curl version>${normal}] [-n ${dim}<nghttp2 version>${normal}] [-d] [-e] [-3] [-x] [-h] [...]"
+	echo -e "  ${subbold}$0${normal} [-o ${dim}<OpenSSL version>${normal}] [-c ${dim}<curl version>${normal}] [-3 ${dim}<nghttp3 version>${normal}] [-2 ${dim}<ngtcp2 version>${normal}] [-d] [-e] [-x] [-h] [...]"
 	echo
 	echo "         -o <version>   Build OpenSSL version (default $OPENSSL)"
 	echo "         -c <version>   Build curl version (default $LIBCURL)"
-	echo "         -n <version>   Build nghttp2 version (default $NGHTTP2)"
-	echo "         -d             Compile without HTTP2 support"
+	echo "         -3 <version>   Build nghttp3 version (default $NGHTTP3)"
+	echo "         -2 <version>   Build ngtcp2 version (default $NGTCP2)"
+	echo "         -d             Compile without HTTP3 support"
 	echo "         -e             Compile with OpenSSL engine support"
 	echo "         -b             Compile without bitcode"
 	echo "         -m             Compile Mac Catalyst library"
 	echo "         -u <version>   Mac Catalyst iOS min target version (default $CATALYST_IOS)"
-	echo "         -3             Compile with SSLv3"
 	echo "         -s <version>   iOS min target version (default $IOS_MIN_SDK_VERSION)"
 	echo "         -t <version>   tvOS min target version (default $TVOS_MIN_SDK_VERSION)"
 	echo "         -i <version>   macOS 86_64 min target version (default $MACOS_X86_64_VERSION)"
@@ -103,11 +103,14 @@ while getopts "o:c:n:u:s:t:i:a:debm3xh\?" o; do
 		c)
 			LIBCURL="${OPTARG}"
 			;;
-		n)
-			NGHTTP2="${OPTARG}"
+		3)
+			NGHTTP3="${OPTARG}"
+			;;
+		2)
+			NGTCP2="${OPTARG}"
 			;;
 		d)
-			buildnghttp2=""
+			buildnghttp3=""
 			;;
 		e)
 			engine="-e"
@@ -121,9 +124,6 @@ while getopts "o:c:n:u:s:t:i:a:debm3xh\?" o; do
 		u)
 			catalyst="-m -u ${OPTARG}"
 			CATALYST_IOS="${OPTARG}"
-			;;
-		3)
-       		sslv3="-3"
 			;;
 		s)
 			IOS_MIN_SDK_VERSION="${OPTARG}"
@@ -159,9 +159,9 @@ OSARGS="-s ${IOS_MIN_SDK_VERSION} -t ${TVOS_MIN_SDK_VERSION} -i ${MACOS_X86_64_V
 ## Welcome
 echo -e "${bold}Build-OpenSSL-cURL${dim}"
 if [ "$catalyst" != "" ]; then
-	echo "This script builds OpenSSL, nghttp2 and libcurl for MacOS, Catalyst, iOS and tvOS devices."
+	echo "This script builds OpenSSL, nghttp3, ngtcp2 and libcurl for MacOS, Catalyst, iOS and tvOS devices."
 else
-	echo "This script builds OpenSSL, nghttp2 and libcurl for MacOS, iOS and tvOS devices."
+	echo "This script builds OpenSSL, nghttp3, ngtcp2 and libcurl for MacOS, iOS and tvOS devices."
 fi
 echo "Targets: x86_64, armv7, armv7s, arm64 and arm64e"
 
@@ -172,17 +172,23 @@ START=$(date +%s)
 echo
 cd openssl
 echo -e "${bold}Building OpenSSL${normal}"
-./openssl-build.sh -v "$OPENSSL" $engine $colorflag $catalyst $sslv3 $OSARGS
+./openssl-build.sh -v "$OPENSSL" $engine $colorflag $catalyst $OSARGS
 cd ..
 
-## Nghttp2 Build
-if [ "$buildnghttp2" == "" ]; then
-	NGHTTP2="NONE"
+## Nghttp3 Build
+if [ "$buildnghttp3" == "" ]; then
+	NGHTTP3="NONE"
+	NGTCP2="NONE"
 else
 	echo
-	echo -e "${bold}Building nghttp2 for HTTP2 support${normal}"
-	cd nghttp2
-	./nghttp2-build.sh -v "$NGHTTP2" $colorflag $catalyst $OSARGS
+	echo -e "${bold}Building nghttp3 for HTTP3 support${normal}"
+	cd nghttp3
+	./nghttp3-build.sh -v "$NGHTTP3" $colorflag $catalyst $OSARGS
+	cd ..
+	echo
+	echo -e "${bold}Building ngtcp2 for HTTP3 support${normal}"
+	cd ngtcp2
+	./ngtcp2-build.sh -v "$NGTCP2" $colorflag $catalyst $OSARGS
 	cd ..
 fi
 
@@ -190,7 +196,7 @@ fi
 echo
 echo -e "${bold}Building Curl${normal}"
 cd curl
-./libcurl-build.sh -v "$LIBCURL" $disablebitcode $colorflag $buildnghttp2 $catalyst $sslv3 $OSARGS
+./libcurl-build.sh -v "$LIBCURL" $disablebitcode $colorflag $buildnghttp3 $catalyst $OSARGS
 cd ..
 
 ## Archive Libraries and Clean Up
@@ -199,17 +205,19 @@ echo -e "${bold}Libraries...${normal}"
 echo
 echo -e "${subbold}openssl${normal} [${dim}$OPENSSL${normal}]${dim}"
 xcrun -sdk iphoneos lipo -info openssl/*/lib/*.a
-if [ "$buildnghttp2" != "" ]; then
+if [ "$buildnghttp3" != "" ]; then
 	echo
-	echo -e "${subbold}nghttp2 (rename to libnghttp2.a)${normal} [${dim}$NGHTTP2${normal}]${dim}"
-	xcrun -sdk iphoneos lipo -info nghttp2/lib/*.a
+	echo -e "${subbold}nghttp3 (rename to libnghttp3.a)${normal} [${dim}$NGHTTP3${normal}]${dim}"
+	xcrun -sdk iphoneos lipo -info nghttp3/lib/*.a
+	echo -e "${subbold}ngtcp2 (rename to libngtcp2.a)${normal} [${dim}$NGTCP2${normal}]${dim}"
+	xcrun -sdk iphoneos lipo -info ngtcp2/lib/*.a
 fi
 echo
 echo -e "${subbold}libcurl (rename to libcurl.a)${normal} [${dim}$LIBCURL${normal}]${dim}"
 xcrun -sdk iphoneos lipo -info curl/lib/*.a
 
 EXAMPLE="example/iOS Test App"
-ARCHIVE="archive/libcurl-$LIBCURL-openssl-$OPENSSL-nghttp2-$NGHTTP2"
+ARCHIVE="archive/libcurl-$LIBCURL-openssl-$OPENSSL-nghttp3-$NGHTTP3-ngtcp2-$NGTCP2"
 
 echo
 echo -e "${bold}Creating archive with XCFrameworks for release v$LIBCURL...${dim}"
@@ -305,31 +313,56 @@ fi
 
 cp openssl/*.a $ARCHIVE/framework
 
-# libraries for nghttp2
-if [ "$buildnghttp2" != "" ]; then
-    # nghttp2 libraries
-	cp nghttp2/lib/libnghttp2_iOS.a $ARCHIVE/lib/iOS/libnghttp2.a
-	cp nghttp2/lib/libnghttp2_iOS-simulator.a $ARCHIVE/lib/iOS-simulator/libnghttp2.a
-	cp nghttp2/lib/libnghttp2_iOS-fat.a $ARCHIVE/lib/iOS-fat/libnghttp2.a
-	cp nghttp2/lib/libnghttp2_tvOS.a $ARCHIVE/lib/tvOS/libnghttp2.a
-	cp nghttp2/lib/libnghttp2_tvOS-simulator.a $ARCHIVE/lib/tvOS-simulator/libnghttp2.a
-	cp nghttp2/lib/libnghttp2_Mac.a $ARCHIVE/lib/MacOS/libnghttp2.a
+# libraries for nghttp3/ngtcp2
+if [ "$buildnghttp3" != "" ]; then
+    # nghttp3 libraries
+	cp nghttp3/lib/libnghttp3_iOS.a $ARCHIVE/lib/iOS/libnghttp3.a
+	cp nghttp3/lib/libnghttp3_iOS-simulator.a $ARCHIVE/lib/iOS-simulator/libnghttp3.a
+	cp nghttp3/lib/libnghttp3_iOS-fat.a $ARCHIVE/lib/iOS-fat/libnghttp3.a
+	cp nghttp3/lib/libnghttp3_tvOS.a $ARCHIVE/lib/tvOS/libnghttp3.a
+	cp nghttp3/lib/libnghttp3_tvOS-simulator.a $ARCHIVE/lib/tvOS-simulator/libnghttp3.a
+	cp nghttp3/lib/libnghttp3_Mac.a $ARCHIVE/lib/MacOS/libnghttp3.a
 	if [ "$catalyst" != "" ]; then
-		cp nghttp2/lib/libnghttp2_Catalyst.a $ARCHIVE/lib/Catalyst/libnghttp2.a
+		cp nghttp3/lib/libnghttp3_Catalyst.a $ARCHIVE/lib/Catalyst/libnghttp3.a
 		xcodebuild -create-xcframework \
-			-library $ARCHIVE/lib/iOS/libnghttp2.a \
-			-library $ARCHIVE/lib/iOS-simulator/libnghttp2.a \
-			-library $ARCHIVE/lib/tvOS/libnghttp2.a \
-			-library $ARCHIVE/lib/tvOS-simulator/libnghttp2.a \
-			-library $ARCHIVE/lib/Catalyst/libnghttp2.a \
-			-output $ARCHIVE/xcframework/libnghttp2.xcframework
+			-library $ARCHIVE/lib/iOS/libnghttp3.a \
+			-library $ARCHIVE/lib/iOS-simulator/libnghttp3.a \
+			-library $ARCHIVE/lib/tvOS/libnghttp3.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libnghttp3.a \
+			-library $ARCHIVE/lib/Catalyst/libnghttp3.a \
+			-output $ARCHIVE/xcframework/libnghttp3.xcframework
 	else
 		xcodebuild -create-xcframework \
-			-library $ARCHIVE/lib/iOS/libnghttp2.a \
-			-library $ARCHIVE/lib/iOS-simulator/libnghttp2.a \
-			-library $ARCHIVE/lib/tvOS/libnghttp2.a \
-			-library $ARCHIVE/lib/tvOS-simulator/libnghttp2.a \
-			-output $ARCHIVE/xcframework/libnghttp2.xcframework
+			-library $ARCHIVE/lib/iOS/libnghttp3.a \
+			-library $ARCHIVE/lib/iOS-simulator/libnghttp3.a \
+			-library $ARCHIVE/lib/tvOS/libnghttp3.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libnghttp3.a \
+			-output $ARCHIVE/xcframework/libnghttp3.xcframework
+	fi
+
+    # ngtcp2 libraries
+	cp ngtcp2/lib/libngtcp2_iOS.a $ARCHIVE/lib/iOS/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_iOS-simulator.a $ARCHIVE/lib/iOS-simulator/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_iOS-fat.a $ARCHIVE/lib/iOS-fat/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_tvOS.a $ARCHIVE/lib/tvOS/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_tvOS-simulator.a $ARCHIVE/lib/tvOS-simulator/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_Mac.a $ARCHIVE/lib/MacOS/libngtcp2.a
+	if [ "$catalyst" != "" ]; then
+		cp ngtcp2/lib/libngtcp2_Catalyst.a $ARCHIVE/lib/Catalyst/libngtcp2.a
+		xcodebuild -create-xcframework \
+			-library $ARCHIVE/lib/iOS/libngtcp2.a \
+			-library $ARCHIVE/lib/iOS-simulator/libngtcp2.a \
+			-library $ARCHIVE/lib/tvOS/libngtcp2.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2.a \
+			-library $ARCHIVE/lib/Catalyst/libngtcp2.a \
+			-output $ARCHIVE/xcframework/libngtcp2.xcframework
+	else
+		xcodebuild -create-xcframework \
+			-library $ARCHIVE/lib/iOS/libngtcp2.a \
+			-library $ARCHIVE/lib/iOS-simulator/libngtcp2.a \
+			-library $ARCHIVE/lib/tvOS/libngtcp2.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2.a \
+			-output $ARCHIVE/xcframework/libngtcp2.xcframework
 	fi
 fi
 
@@ -341,7 +374,7 @@ cp curl/include/curl/* "$ARCHIVE/include/curl"
 curl -sL https://curl.se/ca/cacert.pem > $ARCHIVE/cacert.pem
 
 # create README for archive
-sed -e "s/ZZZCMDS/$BUILD_CMD/g" -e "s/ZZZLIBCURL/$LIBCURL/g" -e "s/ZZZOPENSSL/$OPENSSL/g" -e "s/ZZZNGHTTP2/$NGHTTP2/g" archive/release-template.md > $ARCHIVE/README.md
+sed -e "s/ZZZCMDS/$BUILD_CMD/g" -e "s/ZZZLIBCURL/$LIBCURL/g" -e "s/ZZZOPENSSL/$OPENSSL/g" -e "s/ZZZNGHTTP3/$NGHTTP3/g" -e "s/ZZZNGTCP2/$NGTCP2/g" archive/release-template.md > $ARCHIVE/README.md
 echo
 
 # EXAMPLE App - update test app with latest includes and XCFrameworks
@@ -357,9 +390,11 @@ cp $ARCHIVE/cacert.pem "$EXAMPLE/iOS Test App/cacert.pem"
 cp -R $ARCHIVE/xcframework/libcrypto.xcframework "$EXAMPLE/libs/"
 cp -R $ARCHIVE/xcframework/libssl.xcframework "$EXAMPLE/libs/"
 cp -R $ARCHIVE/xcframework/libcurl.xcframework "$EXAMPLE/libs/"
-if [ "$buildnghttp2" != "" ]; then
-	#cp nghttp2/lib/libnghttp2_iOS-fat.a "$EXAMPLE/libs/libnghttp2.a"
-	cp -R $ARCHIVE/xcframework/libnghttp2.xcframework "$EXAMPLE/libs/"
+if [ "$buildnghttp3" != "" ]; then
+	#cp nghttp3/lib/libnghttp3_iOS-fat.a "$EXAMPLE/libs/libnghttp3.a"
+	#cp ngtcp2/lib/libngtcp2_iOS-fat.a "$EXAMPLE/libs/libngtcp2.a"
+	cp -R $ARCHIVE/xcframework/libnghttp3.xcframework "$EXAMPLE/libs/"
+	cp -R $ARCHIVE/xcframework/libngtcp2.xcframework "$EXAMPLE/libs/"
 fi
 
 echo
@@ -387,5 +422,3 @@ END=$(date +%s)
 secs=$(echo "$END - $START" | bc)
 printf '  Duration %02dh:%02dm:%02ds\n' $(($secs/3600)) $(($secs%3600/60)) $(($secs%60))
 echo -e "${normal}"
-
-rm -f $NOHTTP2
