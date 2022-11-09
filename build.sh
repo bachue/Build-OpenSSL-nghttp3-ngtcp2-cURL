@@ -188,7 +188,7 @@ else
 	echo
 	echo -e "${bold}Building ngtcp2 for HTTP3 support${normal}"
 	cd ngtcp2
-	./ngtcp2-build.sh -v "$NGTCP2" -o "$OPENSSL" -3 "$NGHTTP3" $colorflag $catalyst $OSARGS
+	./ngtcp2-build.sh -v "$NGTCP2" -o "$OPENSSL" $colorflag $catalyst $OSARGS
 	cd ..
 fi
 
@@ -196,7 +196,7 @@ fi
 echo
 echo -e "${bold}Building Curl${normal}"
 cd curl
-./libcurl-build.sh -v "$LIBCURL" $disablebitcode $colorflag $buildnghttp3 $catalyst $OSARGS
+./libcurl-build.sh -v "$LIBCURL" -o "$OPENSSL" $disablebitcode $colorflag $buildnghttp3 $catalyst $OSARGS
 cd ..
 
 ## Archive Libraries and Clean Up

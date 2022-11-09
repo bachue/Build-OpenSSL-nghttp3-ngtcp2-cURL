@@ -34,10 +34,9 @@ trap 'echo -e "${alert}** ERROR with Build - Check /tmp/ngtcp2*.log${alertdim}";
 
 # --- Edit this to update default version ---
 NGTCP2_VERNUM="0.10.0"
+OPENSSL_VERNUM="3.0.7+quic"
 
 # Set defaults
-openssl_vernum=""
-nghttp3_vernum=""
 catalyst="0"
 
 # Set minimum OS versions for target
@@ -65,17 +64,16 @@ usage ()
 	echo
 	echo -e "${bold}Usage:${normal}"
 	echo
-    echo -e "  ${subbold}$0${normal} [-v ${dim}<ngtcp2 version>${normal}] -o ${dim}<openssl version>${normal} -3 ${dim}<nghttp3 version>${normal} [-s ${dim}<iOS SDK version>${normal}] [-t ${dim}<tvOS SDK version>${normal}] [-m] [-x] [-h]"
+    echo -e "  ${subbold}$0${normal} [-v ${dim}<ngtcp2 version>${normal}] [-o ${dim}<openssl version>${normal}] [-s ${dim}<iOS SDK version>${normal}] [-t ${dim}<tvOS SDK version>${normal}] [-m] [-x] [-h]"
     echo
 	echo "         -v   version of ngtcp2 (default $NGTCP2_VERNUM)"
+	echo "         -o   version of openssl (default $OPENSSL_VERNUM)"
 	echo "         -s   iOS min target version (default $IOS_MIN_SDK_VERSION)"
 	echo "         -t   tvOS min target version (default $TVOS_MIN_SDK_VERSION)"
 	echo "         -i   macOS 86_64 min target version (default $MACOS_X86_64_VERSION)"
 	echo "         -a   macOS arm64 min target version (default $MACOS_ARM64_VERSION)"
 	echo "         -m   compile Mac Catalyst library"
 	echo "         -u   Mac Catalyst iOS min target version (default $CATALYST_IOS)"
-	echo "         -o   version of openssl"
-	echo "         -3   version of nghttp3"
 	echo "         -x   disable color output"
 	echo "         -h   show usage"
 	echo
@@ -83,7 +81,7 @@ usage ()
 	exit 127
 }
 
-while getopts "v:s:t:i:a:o:3:u:mxh\?" o; do
+while getopts "v:s:t:i:a:o:u:mxh\?" o; do
     case "${o}" in
         v)
             NGTCP2_VERNUM="${OPTARG}"
@@ -103,16 +101,13 @@ while getopts "v:s:t:i:a:o:3:u:mxh\?" o; do
         m)
             catalyst="1"
             ;;
-		o)
-			openssl_vernum="${OPTARG}"
-			;;
-		3)
-			nghttp3_vernum="${OPTARG}"
-			;;
 		u)
 			catalyst="1"
 			CATALYST_IOS="${OPTARG}"
 			;;
+        o)
+            OPENSSL_VERNUM="${OPTARG}"
+            ;;
         x)
             bold=""
             subbold=""
@@ -225,9 +220,9 @@ buildMac()
 	if [[ $ARCH != ${BUILD_MACHINE} ]]; then
 		# cross compile required
 		if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-			./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+			./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
 		else
-			./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+			./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
 		fi
 	else
 		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
@@ -299,9 +294,9 @@ buildCatalyst()
 
 	# Cross compile required for Catalyst
 	if [[ "${ARCH}" == "arm64" ]]; then
-		./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-catalyst-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-catalyst-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
+		./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
 	else
-		./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-catalyst-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-catalyst-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
+		./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
 	fi
 
 	make -j${CORES} >> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
@@ -348,9 +343,9 @@ buildIOS()
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-		./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-iOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-iOS-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-		./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-iOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-iOS-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}/lib64" --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
 	make -j8 >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
@@ -403,9 +398,9 @@ buildIOSsim()
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-	./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-iOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-iOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-	./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-iOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-iOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
 	make -j8 >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
@@ -453,7 +448,7 @@ buildTVOS()
 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	# chmod u+x ./Configure
 
-	./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-tvOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-tvOS-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
+	./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-tvOS-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-tvOS-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
 
 	# add -isysroot to CC=
@@ -503,9 +498,9 @@ buildTVOSsim()
 	# chmod u+x ./Configure
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-	./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-tvOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-tvOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
 	else
-	./configure PKG_CONFIG_PATH="/tmp/openssl-${openssl_vernum}-tvOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${openssl_vernum}-tvOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}"/lib64/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig LDFLAGS="-Wl,-rpath,/tmp/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}/lib64" --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
 	fi
 
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
