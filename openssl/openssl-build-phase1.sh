@@ -6,7 +6,7 @@
 # Date: 2020-Aug-15
 #
 
-set -e
+set -ex
 
 # Custom build options
 CUSTOMCONFIG="enable-ssl-trace"
@@ -30,7 +30,7 @@ alertdim="\033[0m${red}\033[2m"
 trap 'echo -e "${alert}** ERROR with Build - Check /tmp/openssl*.log${alertdim}"; tail -3 /tmp/openssl*.log' INT TERM EXIT
 
 # Set defaults
-VERSION="3.0.7"				# OpenSSL version default
+VERSION="3.0.7+quic"				# OpenSSL version default
 catalyst="0"
 
 # Set minimum OS versions for target
@@ -436,13 +436,13 @@ rm -rf "${OPENSSL_VERSION}"
 
 if [ ! -e ${OPENSSL_VERSION}.tar.gz ]; then
 	echo "Downloading ${OPENSSL_VERSION}.tar.gz"
-	curl -LOs https://www.openssl.org/source/${OPENSSL_VERSION}.tar.gz
+	curl -LOs https://github.com/quictls/openssl/archive/refs/heads/${OPENSSL_VERSION}.tar.gz
 else
 	echo "Using ${OPENSSL_VERSION}.tar.gz"
 fi
 
 if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-	echo "** Building OpenSSL 1.1.1 **"
+	echo "** Building OpenSSL 1.1.1 / 3.x **"
 else
 	if [[ "$OPENSSL_VERSION" = "openssl-1.0."* ]]; then
 		echo "** Building OpenSSL 1.0.x ** "
@@ -453,7 +453,16 @@ else
 fi
 
 echo "Unpacking openssl"
-tar xfz "${OPENSSL_VERSION}.tar.gz"
+rm -rf /tmp/openssl-extract
+mkdir /tmp/openssl-extract
+cwd="$(pwd)"
+pushd . > /dev/null
+cd /tmp/openssl-extract
+tar xfz "$cwd/${OPENSSL_VERSION}.tar.gz"
+unset cwd
+popd > /dev/null
+mv /tmp/openssl-extract/openssl-* "${OPENSSL_VERSION}"
+rm -rf /tmp/openssl-extract
 
 if [ "$engine" == "1" ]; then
 	echo "+ Activate Static Engine"
