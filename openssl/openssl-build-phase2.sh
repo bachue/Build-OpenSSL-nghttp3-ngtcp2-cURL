@@ -6,7 +6,7 @@
 # Date: 2020-Aug-15
 #
 
-set -ex
+set -e
 
 # Custom build options
 CUSTOMCONFIG="enable-ssl-trace"
