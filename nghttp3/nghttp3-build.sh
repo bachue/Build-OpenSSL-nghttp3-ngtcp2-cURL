@@ -536,7 +536,8 @@ rm -rf "${NGHTTP3_VERSION}"
 
 if [ ! -e ${NGHTTP3_VERSION}.tar.gz ]; then
 	echo "Downloading ${NGHTTP3_VERSION}.tar.gz"
-	curl -Ls -o "${NGHTTP3_VERSION}.tar.gz" https://github.com/ngtcp2/nghttp3/archive/refs/tags/v${NGHTTP3_VERNUM}.tar.gz
+	curl -Ls -o "${NGHTTP3_VERSION}.tar.gz.tmp" https://github.com/ngtcp2/nghttp3/archive/refs/tags/v${NGHTTP3_VERNUM}.tar.gz
+	mv "${NGHTTP3_VERSION}.tar.gz.tmp" "${NGHTTP3_VERSION}.tar.gz"
 else
 	echo "Using ${NGHTTP3_VERSION}.tar.gz"
 fi

@@ -283,7 +283,8 @@ rm -rf "${OPENSSL_VERSION}"
 
 if [ ! -e ${OPENSSL_VERSION}.tar.gz ]; then
 	echo "Downloading ${OPENSSL_VERSION}.tar.gz"
-	curl -LOs https://github.com/quictls/openssl/archive/refs/heads/${OPENSSL_VERSION}.tar.gz
+	curl -Ls -o "${OPENSSL_VERSION}.tar.gz.tmp" https://github.com/quictls/openssl/archive/refs/heads/${OPENSSL_VERSION}.tar.gz
+	mv "${OPENSSL_VERSION}.tar.gz.tmp" "${OPENSSL_VERSION}.tar.gz"
 else
 	echo "Using ${OPENSSL_VERSION}.tar.gz"
 fi
