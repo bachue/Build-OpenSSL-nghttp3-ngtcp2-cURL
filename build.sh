@@ -188,7 +188,7 @@ else
 	echo
 	echo -e "${bold}Building ngtcp2 for HTTP3 support${normal}"
 	cd ngtcp2
-	./ngtcp2-build.sh -v "$NGTCP2" $colorflag $catalyst $OSARGS
+	./ngtcp2-build.sh -v "$NGTCP2" -o "$OPENSSL" -3 "$NGHTTP3" $colorflag $catalyst $OSARGS
 	cd ..
 fi
 
