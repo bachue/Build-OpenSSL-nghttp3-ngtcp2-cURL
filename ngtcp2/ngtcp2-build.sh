@@ -12,7 +12,7 @@
 #
 # NOTE: pkg-config is required
 
-set -e
+set -ex
 
 # Formatting
 default="\033[39m"
@@ -570,6 +570,10 @@ lipo \
         "${NGTCP2}/Mac/x86_64/lib/libngtcp2.a" \
 		"${NGTCP2}/Mac/arm64/lib/libngtcp2.a" \
         -create -output "${NGTCP2}/lib/libngtcp2_Mac.a"
+lipo \
+        "${NGTCP2}/Mac/x86_64/lib/libngtcp2_crypto_openssl.a" \
+		"${NGTCP2}/Mac/arm64/lib/libngtcp2_crypto_openssl.a" \
+        -create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_Mac.a"
 
 if [ $catalyst == "1" ]; then
 echo -e "${bold}Building Catalyst libraries${dim}"
@@ -580,6 +584,10 @@ lipo \
         "${NGTCP2}/Catalyst/x86_64/lib/libngtcp2.a" \
 		"${NGTCP2}/Catalyst/arm64/lib/libngtcp2.a" \
         -create -output "${NGTCP2}/lib/libngtcp2_Catalyst.a"
+lipo \
+        "${NGTCP2}/Catalyst/x86_64/lib/libngtcp2_crypto_openssl.a" \
+		"${NGTCP2}/Catalyst/arm64/lib/libngtcp2_crypto_openssl.a" \
+        -create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_Catalyst.a"
 fi
 
 echo -e "${bold}Building iOS libraries (bitcode)${dim}"
@@ -600,6 +608,14 @@ lipo \
 	"${NGTCP2}/iOS/arm64e/lib/libngtcp2.a" \
 	"${NGTCP2}/iOS-simulator/x86_64/lib/libngtcp2.a" \
 	-create -output "${NGTCP2}/lib/libngtcp2_iOS-fat.a"
+lipo \
+	"${NGTCP2}/iOS/armv7/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/armv7s/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS-simulator/i386/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/arm64/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/arm64e/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS-simulator/x86_64/lib/libngtcp2_crypto_openssl.a" \
+	-create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_iOS-fat.a"
 
 lipo \
 	"${NGTCP2}/iOS/armv7/lib/libngtcp2.a" \
@@ -607,12 +623,23 @@ lipo \
 	"${NGTCP2}/iOS/arm64/lib/libngtcp2.a" \
 	"${NGTCP2}/iOS/arm64e/lib/libngtcp2.a" \
 	-create -output "${NGTCP2}/lib/libngtcp2_iOS.a"
+lipo \
+	"${NGTCP2}/iOS/armv7/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/armv7s/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/arm64/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS/arm64e/lib/libngtcp2_crypto_openssl.a" \
+	-create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_iOS.a"
 
 lipo \
 	"${NGTCP2}/iOS-simulator/i386/lib/libngtcp2.a" \
 	"${NGTCP2}/iOS-simulator/x86_64/lib/libngtcp2.a" \
 	"${NGTCP2}/iOS-simulator/arm64/lib/libngtcp2.a" \
 	-create -output "${NGTCP2}/lib/libngtcp2_iOS-simulator.a"
+lipo \
+	"${NGTCP2}/iOS-simulator/i386/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS-simulator/x86_64/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/iOS-simulator/arm64/lib/libngtcp2_crypto_openssl.a" \
+	-create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_iOS-simulator.a"
 
 echo -e "${bold}Building tvOS libraries${dim}"
 buildTVOS "arm64"
@@ -620,6 +647,9 @@ buildTVOS "arm64"
 lipo \
         "${NGTCP2}/tvOS/arm64/lib/libngtcp2.a" \
         -create -output "${NGTCP2}/lib/libngtcp2_tvOS.a"
+lipo \
+        "${NGTCP2}/tvOS/arm64/lib/libngtcp2_crypto_openssl.a" \
+        -create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_tvOS.a"
 
 buildTVOSsim "x86_64"
 buildTVOSsim "arm64"
@@ -628,11 +658,19 @@ lipo \
         "${NGTCP2}/tvOS/arm64/lib/libngtcp2.a" \
         "${NGTCP2}/tvOS-simulator/x86_64/lib/libngtcp2.a" \
         -create -output "${NGTCP2}/lib/libngtcp2_tvOS-fat.a"
+lipo \
+        "${NGTCP2}/tvOS/arm64/lib/libngtcp2_crypto_openssl.a" \
+        "${NGTCP2}/tvOS-simulator/x86_64/lib/libngtcp2_crypto_openssl.a" \
+        -create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_tvOS-fat.a"
 
 lipo \
 	"${NGTCP2}/tvOS-simulator/x86_64/lib/libngtcp2.a" \
 	"${NGTCP2}/tvOS-simulator/arm64/lib/libngtcp2.a" \
 	-create -output "${NGTCP2}/lib/libngtcp2_tvOS-simulator.a"
+lipo \
+	"${NGTCP2}/tvOS-simulator/x86_64/lib/libngtcp2_crypto_openssl.a" \
+	"${NGTCP2}/tvOS-simulator/arm64/lib/libngtcp2_crypto_openssl.a" \
+	-create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_tvOS-simulator.a"
 
 echo -e "${bold}Cleaning up${dim}"
 rm -rf /tmp/${NGTCP2_VERSION}-*

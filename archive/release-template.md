@@ -1,6 +1,6 @@
 # Release ZZZLIBCURL Library and Headers
 
-This release includes cURL, OpenSSL and Nghttp2 libraries and header files for MacOS, Mac Catalyst, iOS and tvOS projects.
+This release includes cURL, OpenSSL, Nghttp3 and Ngtcp2 libraries and header files for MacOS, Mac Catalyst, iOS and tvOS projects.
 
 ## Build Command
 
@@ -10,13 +10,14 @@ This release includes cURL, OpenSSL and Nghttp2 libraries and header files for M
 
     LIBCURL="ZZZLIBCURL"        # https://curl.haxx.se/download.html
     OPENSSL="ZZZOPENSSL"        # https://www.openssl.org/source/
-    NGHTTP2="ZZZNGHTTP2"        # https://nghttp2.org/
+    NGHTTP3="ZZZNGHTTP3"        # https://nghttp2.org/nghttp3
+    NGTCP2="ZZZNGTCP2"          # https://nghttp2.org/ngtcp2
 
 ## Archive
 
 This directory contains the curl and openssl headers (in the `include` folder), the *.a libraries and XCFrameworks along with MacOS executable binaries for `curl` and `openssl` (intel x86_64 and Apple silicon arm64).
 
-    |__libcurl-ZZZLIBCURL-openssl-ZZZOPENSSL-nghttp2-ZZZNGHTTP2
+    |__libcurl-ZZZLIBCURL-openssl-ZZZOPENSSL-nghttp3-ZZZNGHTTP3-ngtcp2-ZZZNGTCP2
         |
         |__ bin/
         │   |__ curl*  (universal binary)
@@ -66,7 +67,7 @@ This directory contains the curl and openssl headers (in the `include` folder), 
 ## Usage
 
  1. Copy headers to your project.
- 2. Import appropriate libraries: "libssl.a", "libcrypto.a", "libcurl.a", "libnghttp2.a" *or*
+ 2. Import appropriate libraries: "libssl.a", "libcrypto.a", "libcurl.a", "libnghttp3.a", "libngtcp2.a" *or*
     **XCFrameworks Alternative**: Import appropriate *xcframework* folders into your project in Xcode.
  3. Reference Headers.
  4. Specifying the flag  "-lz" in "Other Linker Flags" (OTHER_LDFLAGS) setting in the "Linking" section in the Build settings of the target.
@@ -74,7 +75,7 @@ This directory contains the curl and openssl headers (in the `include` folder), 
 
         #include <curl/curl.h>
 
-        - (void)foo {    
-            CURL* cURL = curl_easy_init();  
-            ...  
+        - (void)foo {
+            CURL* cURL = curl_easy_init();
+            ...
         }

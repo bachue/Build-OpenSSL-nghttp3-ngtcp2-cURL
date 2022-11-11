@@ -7,7 +7,7 @@
 #
 
 # Ensure we stop if build failure occurs
-set -e
+set -ex
 
 ################################################
 # EDIT this section to Select Default Versions #
@@ -347,8 +347,15 @@ if [ "$buildnghttp3" != "" ]; then
 	cp ngtcp2/lib/libngtcp2_tvOS.a $ARCHIVE/lib/tvOS/libngtcp2.a
 	cp ngtcp2/lib/libngtcp2_tvOS-simulator.a $ARCHIVE/lib/tvOS-simulator/libngtcp2.a
 	cp ngtcp2/lib/libngtcp2_Mac.a $ARCHIVE/lib/MacOS/libngtcp2.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_iOS.a $ARCHIVE/lib/iOS/libngtcp2_crypto_openssl.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_iOS-simulator.a $ARCHIVE/lib/iOS-simulator/libngtcp2_crypto_openssl.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_iOS-fat.a $ARCHIVE/lib/iOS-fat/libngtcp2_crypto_openssl.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_tvOS.a $ARCHIVE/lib/tvOS/libngtcp2_crypto_openssl.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_tvOS-simulator.a $ARCHIVE/lib/tvOS-simulator/libngtcp2_crypto_openssl.a
+	cp ngtcp2/lib/libngtcp2_crypto_openssl_Mac.a $ARCHIVE/lib/MacOS/libngtcp2_crypto_openssl.a
 	if [ "$catalyst" != "" ]; then
 		cp ngtcp2/lib/libngtcp2_Catalyst.a $ARCHIVE/lib/Catalyst/libngtcp2.a
+		cp ngtcp2/lib/libngtcp2_crypto_openssl_Catalyst.a $ARCHIVE/lib/Catalyst/libngtcp2_crypto_openssl.a
 		xcodebuild -create-xcframework \
 			-library $ARCHIVE/lib/iOS/libngtcp2.a \
 			-library $ARCHIVE/lib/iOS-simulator/libngtcp2.a \
@@ -356,6 +363,13 @@ if [ "$buildnghttp3" != "" ]; then
 			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2.a \
 			-library $ARCHIVE/lib/Catalyst/libngtcp2.a \
 			-output $ARCHIVE/xcframework/libngtcp2.xcframework
+		xcodebuild -create-xcframework \
+			-library $ARCHIVE/lib/iOS/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/iOS-simulator/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/tvOS/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/Catalyst/libngtcp2_crypto_openssl.a \
+			-output $ARCHIVE/xcframework/libngtcp2_crypto_openssl.xcframework
 	else
 		xcodebuild -create-xcframework \
 			-library $ARCHIVE/lib/iOS/libngtcp2.a \
@@ -363,6 +377,12 @@ if [ "$buildnghttp3" != "" ]; then
 			-library $ARCHIVE/lib/tvOS/libngtcp2.a \
 			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2.a \
 			-output $ARCHIVE/xcframework/libngtcp2.xcframework
+		xcodebuild -create-xcframework \
+			-library $ARCHIVE/lib/iOS/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/iOS-simulator/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/tvOS/libngtcp2_crypto_openssl.a \
+			-library $ARCHIVE/lib/tvOS-simulator/libngtcp2_crypto_openssl.a \
+			-output $ARCHIVE/xcframework/libngtcp2_crypto_openssl.xcframework
 	fi
 fi
 
@@ -395,6 +415,7 @@ if [ "$buildnghttp3" != "" ]; then
 	#cp ngtcp2/lib/libngtcp2_iOS-fat.a "$EXAMPLE/libs/libngtcp2.a"
 	cp -R $ARCHIVE/xcframework/libnghttp3.xcframework "$EXAMPLE/libs/"
 	cp -R $ARCHIVE/xcframework/libngtcp2.xcframework "$EXAMPLE/libs/"
+	cp -R $ARCHIVE/xcframework/libngtcp2_crypto_openssl.xcframework "$EXAMPLE/libs/"
 fi
 
 echo
