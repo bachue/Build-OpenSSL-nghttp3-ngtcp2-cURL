@@ -302,7 +302,7 @@ fi
 
 echo "Unpacking openssl"
 rm -rf ${TMPDIR}/openssl-extract
-mkdir ${TMPDIR}/openssl-extract
+mkdir -p ${TMPDIR}/openssl-extract
 cwd="$(pwd)"
 pushd . > /dev/null
 cd ${TMPDIR}/openssl-extract
