@@ -154,7 +154,7 @@ if version_lte $MACOS_ARM64_VERSION 11.0; then
 fi
 
 # Set OS min versions
-OSARGS="-s '${IOS_MIN_SDK_VERSION}' -t '${TVOS_MIN_SDK_VERSION}' -i '${MACOS_X86_64_VERSION}' -a '${MACOS_ARM64_VERSION}'"
+OSARGS="-s ${IOS_MIN_SDK_VERSION} -t ${TVOS_MIN_SDK_VERSION} -i ${MACOS_X86_64_VERSION} -a ${MACOS_ARM64_VERSION}"
 
 ## Welcome
 echo -e "${bold}Build-OpenSSL-cURL${dim}"
