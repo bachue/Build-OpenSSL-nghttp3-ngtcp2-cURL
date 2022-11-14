@@ -154,25 +154,13 @@ buildIOS()
 		if [[ $ARCH == "x86_64" ]]; then
 			TARGET="darwin64-x86_64-cc"
 		fi
-		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
-		else
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
-		fi
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	else
-		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
-		else
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
-		fi
+		# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
+		./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	fi
 	# add -isysroot to CC=
-	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
-	else
-		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
-	fi
+	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 
 	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
@@ -228,19 +216,11 @@ buildIOSsim()
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${PLATFORM} ${iOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${MIPHONEOS})"
 
 	# configure
-	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
-	else
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
-	fi
+	./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 
 	# add -isysroot to CC=
 	# no longer needed with exports
-	#if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-	#	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
-	#else
-	#	sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
-	#fi
+	# sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 
 	# make
 	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
@@ -291,13 +271,10 @@ fi
 
 if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 	echo "** Building OpenSSL 1.1.1 / 3.x **"
-else
-	if [[ "$OPENSSL_VERSION" = "openssl-1.0."* ]]; then
-		echo "** Building OpenSSL 1.0.x ** "
-		echo -e "${alert}** WARNING: End of Life Version - Upgrade to 1.1.1 **${dim}"
-	else
-		echo -e "${alert}** WARNING: This build script has not been tested with $OPENSSL_VERSION **${dim}"
-	fi
+elif [[ "$OPENSSL_VERSION" = "openssl-1.0."* ]]; then
+	echo "** Building OpenSSL 1.0.x ** "
+	echo -e "${alert}** WARNING: End of Life Version - Upgrade to 1.1.1 **${dim}"
+	exit 1
 fi
 
 echo "Unpacking openssl"
