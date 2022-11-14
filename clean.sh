@@ -4,4 +4,4 @@ rm -fr curl/curl-* curl/include curl/lib openssl/openssl-openssl-* openssl/opens
         nghttp3/nghttp3-0* nghttp3/Mac nghttp3/iOS* nghttp3/tvOS* nghttp3/lib nghttp3/Catalyst nghttp3/pkg-config* \
         ngtcp2/ngtcp2-0* ngtcp2/Mac ngtcp2/iOS* ngtcp2/tvOS* ngtcp2/lib ngtcp2/Catalyst ngtcp2/pkg-config* \
         example/iOS\ Test\ App/build/* *.tgz *.pkg \
-        /tmp/curl /tmp/openssl /tmp/openssl-*  /tmp/nghttp3-* /tmp/ngtcp2-* /tmp/pkg_config /tmp/openssl-extract
+        ${TMPDIR}/curl ${TMPDIR}/openssl ${TMPDIR}/openssl-*  ${TMPDIR}/nghttp3-* ${TMPDIR}/ngtcp2-* ${TMPDIR}/pkg_config ${TMPDIR}/openssl-extract

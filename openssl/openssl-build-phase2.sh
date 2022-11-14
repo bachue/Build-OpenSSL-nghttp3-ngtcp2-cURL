@@ -27,7 +27,7 @@ alert="\033[0m${red}\033[1m"
 alertdim="\033[0m${red}\033[2m"
 
 # set trap to help debug build errors
-trap 'echo -e "${alert}** ERROR with Build - Check /tmp/openssl*.log${alertdim}"; tail -3 /tmp/openssl*.log' INT TERM EXIT
+trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/openssl*.log${alertdim}"; tail -3 ${TMPDIR}/openssl*.log' INT TERM EXIT
 
 # Set minimum OS versions for target
 MACOS_X86_64_VERSION=""			# Empty = use host version
@@ -155,16 +155,16 @@ buildIOS()
 			TARGET="darwin64-x86_64-cc"
 		fi
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		fi
 	else
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 			# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		fi
 	fi
 	# add -isysroot to CC=
@@ -174,9 +174,9 @@ buildIOS()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -229,9 +229,9 @@ buildIOSsim()
 
 	# configure
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	fi
 
 	# add -isysroot to CC=
@@ -243,9 +243,9 @@ buildIOSsim()
 	#fi
 
 	# make
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -276,8 +276,8 @@ mkdir -p iOS-simulator/include/openssl/
 mkdir -p iOS-fat/include/openssl/
 mkdir -p tvOS/include/openssl/
 
-rm -rf "/tmp/${OPENSSL_VERSION}-*"
-rm -rf "/tmp/${OPENSSL_VERSION}-*.log"
+rm -rf "${TMPDIR}/${OPENSSL_VERSION}-*"
+rm -rf "${TMPDIR}/${OPENSSL_VERSION}-*.log"
 
 rm -rf "${OPENSSL_VERSION}"
 
@@ -301,16 +301,16 @@ else
 fi
 
 echo "Unpacking openssl"
-rm -rf /tmp/openssl-extract
-mkdir /tmp/openssl-extract
+rm -rf ${TMPDIR}/openssl-extract
+mkdir ${TMPDIR}/openssl-extract
 cwd="$(pwd)"
 pushd . > /dev/null
-cd /tmp/openssl-extract
+cd ${TMPDIR}/openssl-extract
 tar xfz "$cwd/${OPENSSL_VERSION}.tar.gz"
 unset cwd
 popd > /dev/null
-mv /tmp/openssl-extract/openssl-* "${OPENSSL_VERSION}"
-rm -rf /tmp/openssl-extract
+mv ${TMPDIR}/openssl-extract/openssl-* "${OPENSSL_VERSION}"
+rm -rf ${TMPDIR}/openssl-extract
 
 if [ "$engine" == "1" ]; then
 	echo "+ Activate Static Engine"
@@ -328,55 +328,55 @@ buildIOSsim "x86_64"
 buildIOSsim "arm64"
 
 echo "  Copying headers and libraries"
-cp /tmp/${OPENSSL_VERSION}-iOS-arm64/include/openssl/* iOS/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/include/openssl/* iOS/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7s/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64e/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7s/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64e/lib/libcrypto.a" \
 	-create -output iOS/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7s/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64e/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7s/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64e/lib/libssl.a" \
 	-create -output iOS/lib/libssl.a
 
 
-cp /tmp/${OPENSSL_VERSION}-iOS-Simulator-x86_64/include/openssl/* iOS-simulator/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-x86_64/include/openssl/* iOS-simulator/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-arm64/lib/libcrypto.a" \
 	-create -output iOS-simulator/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-arm64/lib/libssl.a" \
 	-create -output iOS-simulator/lib/libssl.a
 
-cp /tmp/${OPENSSL_VERSION}-iOS-arm64/include/openssl/* iOS-fat/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/include/openssl/* iOS-fat/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7s/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64e/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7s/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64e/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libcrypto.a" \
 	-create -output iOS-fat/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-armv7s/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-arm64e/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-armv7s/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-arm64e/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-x86_64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-i386/lib/libssl.a" \
 	-create -output iOS-fat/lib/libssl.a
 
 echo "  Creating combined OpenSSL libraries for iOS"

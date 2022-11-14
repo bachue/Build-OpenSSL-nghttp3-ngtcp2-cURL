@@ -27,7 +27,7 @@ alert="\033[0m${red}\033[1m"
 alertdim="\033[0m${red}\033[2m"
 
 # Set trap to help debug build errors
-trap 'echo -e "${alert}** ERROR with Build - Check /tmp/openssl*.log${alertdim}"; tail -3 /tmp/openssl*.log' INT TERM EXIT
+trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/openssl*.log${alertdim}"; tail -3 ${TMPDIR}/openssl*.log' INT TERM EXIT
 
 # Set defaults
 VERSION="3.0.7+quic"				# OpenSSL version default
@@ -173,21 +173,21 @@ buildMac()
 	pushd . > /dev/null
 	cd "${OPENSSL_VERSION}"
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3."* ]]; then
-		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="/tmp/${OPENSSL_VERSION}-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-${ARCH}.log"
+		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 --openssldir="/tmp/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-${ARCH}.log"
+		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	fi
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
 	# Keep openssl binary for Mac version
-	cp "/tmp/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "/tmp/openssl-${ARCH}"
-	cp "/tmp/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "/tmp/openssl"
-	make clean >> "/tmp/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
+	cp "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "${TMPDIR}/openssl-${ARCH}"
+	cp "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "${TMPDIR}/openssl"
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	if [ $ARCH == ${BUILD_MACHINE} ]; then
 		echo -e "Testing binary for ${BUILD_MACHINE}:"
-		/tmp/openssl version
+		${TMPDIR}/openssl version
 	fi
 
 	# Clean up exports
@@ -246,9 +246,9 @@ buildCatalyst()
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${archbold}${ARCH}${dim} (MacOS ${MACOS_VER} Catalyst iOS ${CATALYST_IOS})"
 
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode enable-tls1_3 --prefix="/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode enable-tls1_3 --prefix="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared enable-tls1_3 --openssldir="/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 	fi
 
 	#if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
@@ -257,9 +257,9 @@ buildCatalyst()
 	#	sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} !" "Makefile"
 	#fi
 
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -309,16 +309,16 @@ buildTVOS()
 
 	if [[ "${ARCH}" == "x86_64" ]]; then
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 -no-shared --prefix="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		else
-			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		fi
 	else
 		export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode -arch ${ARCH}"
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		else
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		fi
 	fi
 	# add -isysroot to CC=
@@ -328,9 +328,9 @@ buildTVOS()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -380,9 +380,9 @@ buildTVOSsim()
 	chmod u+x ./Configure
 
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm  ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+		./Configure no-asm  ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 	else
-		./Configure no-asm no-module no-legacy enable-tls1_3 --openssldir="/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+		./Configure no-asm no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 	fi
 
 	# add -isysroot to CC=
@@ -392,9 +392,9 @@ buildTVOSsim()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
-	make install_sw >> "/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
+	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -424,9 +424,9 @@ mkdir -p tvOS/include/openssl/
 mkdir -p tvOS-simulator/lib
 mkdir -p tvOS-simulator/include/openssl/
 
-rm -rf "/tmp/openssl"
-rm -rf "/tmp/${OPENSSL_VERSION}-*"
-rm -rf "/tmp/${OPENSSL_VERSION}-*.log"
+rm -rf "${TMPDIR}/openssl"
+rm -rf "${TMPDIR}/${OPENSSL_VERSION}-*"
+rm -rf "${TMPDIR}/${OPENSSL_VERSION}-*.log"
 
 rm -rf "${OPENSSL_VERSION}"
 
@@ -450,16 +450,16 @@ else
 fi
 
 echo "Unpacking openssl"
-rm -rf /tmp/openssl-extract
-mkdir /tmp/openssl-extract
+rm -rf ${TMPDIR}/openssl-extract
+mkdir ${TMPDIR}/openssl-extract
 cwd="$(pwd)"
 pushd . > /dev/null
-cd /tmp/openssl-extract
+cd ${TMPDIR}/openssl-extract
 tar xfz "$cwd/${OPENSSL_VERSION}.tar.gz"
 unset cwd
 popd > /dev/null
-mv /tmp/openssl-extract/openssl-* "${OPENSSL_VERSION}"
-rm -rf /tmp/openssl-extract
+mv ${TMPDIR}/openssl-extract/openssl-* "${OPENSSL_VERSION}"
+rm -rf ${TMPDIR}/openssl-extract
 
 if [ "$engine" == "1" ]; then
 	echo "+ Activate Static Engine"
@@ -472,16 +472,16 @@ buildMac "x86_64"
 buildMac "arm64"
 
 echo "  Copying headers and libraries"
-cp /tmp/${OPENSSL_VERSION}-x86_64/include/openssl/* Mac/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-x86_64/include/openssl/* Mac/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-x86_64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-x86_64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-arm64/lib/libcrypto.a" \
 	-create -output Mac/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-x86_64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-x86_64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-arm64/lib/libssl.a" \
 	-create -output Mac/lib/libssl.a
 
 ## Catalyst
@@ -491,16 +491,16 @@ if [ $catalyst == "1" ]; then
 	buildCatalyst "arm64"
 
 	echo "  Copying headers and libraries"
-	cp /tmp/${OPENSSL_VERSION}-catalyst-x86_64/include/openssl/* Catalyst/include/openssl/
+	cp ${TMPDIR}/${OPENSSL_VERSION}-catalyst-x86_64/include/openssl/* Catalyst/include/openssl/
 
 	lipo \
-		"/tmp/${OPENSSL_VERSION}-catalyst-x86_64/lib/libcrypto.a" \
-		"/tmp/${OPENSSL_VERSION}-catalyst-arm64/lib/libcrypto.a" \
+		"${TMPDIR}/${OPENSSL_VERSION}-catalyst-x86_64/lib/libcrypto.a" \
+		"${TMPDIR}/${OPENSSL_VERSION}-catalyst-arm64/lib/libcrypto.a" \
 		-create -output Catalyst/lib/libcrypto.a
 
 	lipo \
-		"/tmp/${OPENSSL_VERSION}-catalyst-x86_64/lib/libssl.a" \
-		"/tmp/${OPENSSL_VERSION}-catalyst-arm64/lib/libssl.a" \
+		"${TMPDIR}/${OPENSSL_VERSION}-catalyst-x86_64/lib/libssl.a" \
+		"${TMPDIR}/${OPENSSL_VERSION}-catalyst-arm64/lib/libssl.a" \
 		-create -output Catalyst/lib/libssl.a
 fi
 
@@ -509,14 +509,14 @@ echo -e "${bold}Building tvOS libraries${dim}"
 buildTVOS "arm64"
 
 echo "  Copying headers and libraries"
-cp /tmp/${OPENSSL_VERSION}-tvOS-arm64/include/openssl/* tvOS/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-tvOS-arm64/include/openssl/* tvOS/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-arm64/lib/libcrypto.a" \
 	-create -output tvOS/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-arm64/lib/libssl.a" \
 	-create -output tvOS/lib/libssl.a
 
 
@@ -525,26 +525,26 @@ buildTVOSsim "arm64"
 buildTVOSsim "x86_64"
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-arm64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libcrypto.a" \
 	-create -output tvOS-fat/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-arm64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libssl.a" \
 	-create -output tvOS-fat/lib/libssl.a
 
 echo "  Copying headers and libraries"
-cp /tmp/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/include/openssl/* tvOS-simulator/include/openssl/
+cp ${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/include/openssl/* tvOS-simulator/include/openssl/
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-arm64/lib/libcrypto.a" \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-arm64/lib/libcrypto.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libcrypto.a" \
 	-create -output tvOS-simulator/lib/libcrypto.a
 
 lipo \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-arm64/lib/libssl.a" \
-	"/tmp/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-arm64/lib/libssl.a" \
+	"${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-x86_64/lib/libssl.a" \
 	-create -output tvOS-simulator/lib/libssl.a
 
 if [ $catalyst == "1" ]; then

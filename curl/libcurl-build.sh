@@ -31,7 +31,7 @@ alert="\033[0m${red}\033[1m"
 alertdim="\033[0m${red}\033[2m"
 
 # Set trap to help debug any build errors
-trap 'echo -e "${alert}** ERROR with Build - Check /tmp/curl*.log${alertdim}"; tail -3 /tmp/curl*.log' INT TERM EXIT
+trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/curl*.log${alertdim}"; tail -3 ${TMPDIR}/curl*.log' INT TERM EXIT
 
 # Set defaults
 CURL_VERSION="curl-7.86.0"
@@ -166,7 +166,7 @@ else
 fi
 
 # Check to see if pkg-config is already installed
-PATH=$PATH:/tmp/pkg_config/bin
+PATH=$PATH:${TMPDIR}/pkg_config/bin
 if ! (type "pkg-config" > /dev/null 2>&1 ) ; then
 	echo -e "${alertdim}** WARNING: pkg-config not installed... attempting to install.${dim}"
 
@@ -180,9 +180,9 @@ if ! (type "pkg-config" > /dev/null 2>&1 ) ; then
 		echo "  Building pkg-config"
 		tar xfz pkg-config-0.29.2.tar.gz
 		pushd pkg-config-0.29.2 > /dev/null
-		./configure --prefix=/tmp/pkg_config --with-internal-glib >> "/tmp/${CURL_VERSION}.log" 2>&1
-		make -j${CORES} >> "/tmp/${CURL_VERSION}.log" 2>&1
-		make install >> "/tmp/${CURL_VERSION}.log" 2>&1
+		./configure --prefix=${TMPDIR}/pkg_config --with-internal-glib >> "${TMPDIR}/${CURL_VERSION}.log" 2>&1
+		make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}.log" 2>&1
+		make install >> "${TMPDIR}/${CURL_VERSION}.log" 2>&1
 		popd > /dev/null
 	fi
 
@@ -250,20 +250,20 @@ buildMac()
 
 	pushd . > /dev/null
 	cd "${CURL_VERSION}"
-	./configure -prefix="/tmp/${CURL_VERSION}-${ARCH}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/Mac ${NGHTTP3CFG} ${NGTCP2CFG} --host=${HOST} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-${ARCH}.log"
+	./configure -prefix="${TMPDIR}/${CURL_VERSION}-${ARCH}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/Mac ${NGHTTP3CFG} ${NGTCP2CFG} --host=${HOST} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-${ARCH}.log"
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-${ARCH}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-${ARCH}.log" 2>&1
 	# Save curl binary for Mac Version
-	cp "/tmp/${CURL_VERSION}-${ARCH}/bin/curl" "/tmp/curl-${ARCH}"
-	cp "/tmp/${CURL_VERSION}-${ARCH}/bin/curl" "/tmp/curl"
-	make clean >> "/tmp/${CURL_VERSION}-${ARCH}.log" 2>&1
+	cp "${TMPDIR}/${CURL_VERSION}-${ARCH}/bin/curl" "${TMPDIR}/curl-${ARCH}"
+	cp "${TMPDIR}/${CURL_VERSION}-${ARCH}/bin/curl" "${TMPDIR}/curl"
+	make clean >> "${TMPDIR}/${CURL_VERSION}-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# test binary
 	if [ $ARCH == ${BUILD_MACHINE} ]; then
 		echo -e "Testing binary for ${BUILD_MACHINE}:"
-		/tmp/curl -V
+		${TMPDIR}/curl -V
 	fi
 }
 
@@ -302,14 +302,14 @@ buildCatalyst()
 	echo -e "${subbold}Building ${CURL_VERSION} for ${archbold}${ARCH}${dim} ${BITCODE} (Mac Catalyst iOS ${CATALYST_IOS})"
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-		./configure -prefix="/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/catalyst ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/catalyst ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log"
 	else
-		./configure -prefix="/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/catalyst ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/catalyst ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${CURL_VERSION}-catalyst-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 }
 
@@ -349,14 +349,14 @@ buildIOS()
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -L${OPENSSL}/${PLATFORMDIR}/lib ${NGHTTP3LIB} ${NGTCP2LIB}"
 
 	if [[ "${ARCH}" == *"arm64"* || "${ARCH}" == "arm64e" ]]; then
-		./configure -prefix="/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-		./configure -prefix="/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${CURL_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 }
 
@@ -405,14 +405,14 @@ buildIOSsim()
 	echo -e "${subbold}Building ${CURL_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} ${BITCODE} (iOS ${IOS_MIN_SDK_VERSION})"
 
 	if [[ "${ARCH}" == *"arm64"* || "${ARCH}" == "arm64e" ]]; then
-		./configure -prefix="/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="arm-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log"
 	else
-		./configure -prefix="/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log"
+		./configure -prefix="${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}" --disable-shared --enable-static -with-random=/dev/urandom --with-ssl=${OPENSSL}/${PLATFORMDIR} ${NGHTTP3CFG} ${NGTCP2CFG} --host="${ARCH}-apple-darwin" --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${CURL_VERSION}-iOS-simulator-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 }
 
@@ -446,15 +446,15 @@ buildTVOS()
 
 	echo -e "${subbold}Building ${CURL_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS ${TVOS_MIN_SDK_VERSION})"
 
-	./configure -prefix="/tmp/${CURL_VERSION}-tvOS-${ARCH}" --host="arm-apple-darwin" --disable-shared -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/tvOS" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-tvOS-${ARCH}.log"
+	./configure -prefix="${TMPDIR}/${CURL_VERSION}-tvOS-${ARCH}" --host="arm-apple-darwin" --disable-shared -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/tvOS" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-tvOS-${ARCH}.log"
 
 	# Patch to not use fork() since it's not available on tvOS
         LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./lib/curl_config.h"
         LANG=C sed -i -- 's/HAVE_FORK"]=" 1"/HAVE_FORK\"]=" 0"/' "config.status"
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${CURL_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 }
 
@@ -491,18 +491,18 @@ buildTVOSsim()
 	echo -e "${subbold}Building ${CURL_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS SIM ${TVOS_MIN_SDK_VERSION})"
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-		./configure --prefix="/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}" --host="arm-apple-darwin" --disable-shared -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/${PLATFORMDIR}" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper&> "/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}.log"
+		./configure --prefix="${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}" --host="arm-apple-darwin" --disable-shared -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/${PLATFORMDIR}" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper&> "${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}.log"
 	else
-		./configure --prefix="/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}" --host="${ARCH}-apple-darwin" --disable-shared  -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/${PLATFORMDIR}" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}.log"
+		./configure --prefix="${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}" --host="${ARCH}-apple-darwin" --disable-shared  -with-random=/dev/urandom --disable-ntlm-wb --with-ssl="${OPENSSL}/${PLATFORMDIR}" ${NGHTTP3CFG} ${NGTCP2CFG} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper &> "${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}.log"
 	fi
 
 	# Patch to not use fork() since it's not available on tvOS
         LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./lib/curl_config.h"
         LANG=C sed -i -- 's/HAVE_FORK"]=" 1"/HAVE_FORK\"]=" 0"/' "config.status"
 
-	make -j${CORES} >> "/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
-	make install >> "/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${CURL_VERSION}-tvOS-simulator-${ARCH}.log" 2>&1
 	popd > /dev/null
 }
 
@@ -512,9 +512,9 @@ rm -rf include/curl/* lib/*
 mkdir -p lib
 mkdir -p include/curl/
 
-rm -fr "/tmp/curl"
-rm -rf "/tmp/${CURL_VERSION}-*"
-rm -rf "/tmp/${CURL_VERSION}-*.log"
+rm -fr "${TMPDIR}/curl"
+rm -rf "${TMPDIR}/${CURL_VERSION}-*"
+rm -rf "${TMPDIR}/${CURL_VERSION}-*.log"
 
 rm -rf "${CURL_VERSION}"
 
@@ -534,11 +534,11 @@ buildMac "x86_64"
 buildMac "arm64"
 
 echo "  Copying headers"
-cp /tmp/${CURL_VERSION}-x86_64/include/curl/* include/curl/
+cp ${TMPDIR}/${CURL_VERSION}-x86_64/include/curl/* include/curl/
 
 lipo \
-	"/tmp/${CURL_VERSION}-x86_64/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-arm64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-x86_64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-arm64/lib/libcurl.a" \
 	-create -output lib/libcurl_Mac.a
 
 if [ $catalyst == "1" ]; then
@@ -547,8 +547,8 @@ buildCatalyst "x86_64" "bitcode"
 buildCatalyst "arm64" "bitcode"
 
 lipo \
-	"/tmp/${CURL_VERSION}-catalyst-x86_64-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-catalyst-arm64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-catalyst-x86_64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-catalyst-arm64-bitcode/lib/libcurl.a" \
 	-create -output lib/libcurl_Catalyst.a
 fi
 
@@ -559,10 +559,10 @@ buildIOS "arm64" "bitcode"
 buildIOS "arm64e" "bitcode"
 
 lipo \
-	"/tmp/${CURL_VERSION}-iOS-armv7-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-armv7s-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-arm64-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-arm64e-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-armv7-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-armv7s-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-arm64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-arm64e-bitcode/lib/libcurl.a" \
 	-create -output lib/libcurl_iOS.a
 
 buildIOSsim "i386" "bitcode"
@@ -570,18 +570,18 @@ buildIOSsim "x86_64" "bitcode"
 buildIOSsim "arm64" "bitcode"
 
 lipo \
-	"/tmp/${CURL_VERSION}-iOS-simulator-i386-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-simulator-x86_64-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-simulator-arm64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-simulator-i386-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-simulator-x86_64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-simulator-arm64-bitcode/lib/libcurl.a" \
 	-create -output lib/libcurl_iOS-simulator.a
 
 lipo \
-	"/tmp/${CURL_VERSION}-iOS-armv7-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-armv7s-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-arm64-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-arm64e-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-simulator-i386-bitcode/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-iOS-simulator-x86_64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-armv7-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-armv7s-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-arm64-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-arm64e-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-simulator-i386-bitcode/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-iOS-simulator-x86_64-bitcode/lib/libcurl.a" \
 	-create -output lib/libcurl_iOS-fat.a
 
 if [[ "${NOBITCODE}" == "yes" ]]; then
@@ -594,12 +594,12 @@ if [[ "${NOBITCODE}" == "yes" ]]; then
 	buildIOSsim "i386" "nobitcode"
 
 	lipo \
-		"/tmp/${CURL_VERSION}-iOS-armv7-nobitcode/lib/libcurl.a" \
-		"/tmp/${CURL_VERSION}-iOS-armv7s-nobitcode/lib/libcurl.a" \
-		"/tmp/${CURL_VERSION}-iOS-simulator-i386-nobitcode/lib/libcurl.a" \
-		"/tmp/${CURL_VERSION}-iOS-arm64-nobitcode/lib/libcurl.a" \
-		"/tmp/${CURL_VERSION}-iOS-arm64e-nobitcode/lib/libcurl.a" \
-		"/tmp/${CURL_VERSION}-iOS-simulator-x86_64-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-armv7-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-armv7s-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-simulator-i386-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-arm64-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-arm64e-nobitcode/lib/libcurl.a" \
+		"${TMPDIR}/${CURL_VERSION}-iOS-simulator-x86_64-nobitcode/lib/libcurl.a" \
 		-create -output lib/libcurl_iOS_nobitcode.a
 
 fi
@@ -608,24 +608,24 @@ echo -e "${bold}Building tvOS libraries${dim}"
 buildTVOS "arm64"
 
 lipo \
-	"/tmp/${CURL_VERSION}-tvOS-arm64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-tvOS-arm64/lib/libcurl.a" \
 	-create -output lib/libcurl_tvOS.a
 
 buildTVOSsim "x86_64"
 buildTVOSsim "arm64"
 
 lipo \
-	"/tmp/${CURL_VERSION}-tvOS-arm64/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-tvOS-simulator-x86_64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-tvOS-arm64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-tvOS-simulator-x86_64/lib/libcurl.a" \
 	-create -output lib/libcurl_tvOS-fat.a
 
 lipo \
-	"/tmp/${CURL_VERSION}-tvOS-simulator-x86_64/lib/libcurl.a" \
-	"/tmp/${CURL_VERSION}-tvOS-simulator-arm64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-tvOS-simulator-x86_64/lib/libcurl.a" \
+	"${TMPDIR}/${CURL_VERSION}-tvOS-simulator-arm64/lib/libcurl.a" \
 	-create -output lib/libcurl_tvOS-simulator.a
 
 echo -e "${bold}Cleaning up${dim}"
-rm -rf /tmp/${CURL_VERSION}-*
+rm -rf ${TMPDIR}/${CURL_VERSION}-*
 rm -rf ${CURL_VERSION}
 
 echo "Checking libraries"

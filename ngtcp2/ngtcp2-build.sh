@@ -30,7 +30,7 @@ alert="\033[0m${red}\033[1m"
 alertdim="\033[0m${red}\033[2m"
 
 # set trap to help debug build errors
-trap 'echo -e "${alert}** ERROR with Build - Check /tmp/ngtcp2*.log${alertdim}"; tail -5 /tmp/ngtcp2*.log' INT TERM EXIT
+trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/ngtcp2*.log${alertdim}"; tail -5 ${TMPDIR}/ngtcp2*.log' INT TERM EXIT
 
 # --- Edit this to update default version ---
 NGTCP2_VERNUM="0.10.0"
@@ -154,10 +154,10 @@ else
 		echo "  Building pkg-config"
 		tar xfz pkg-config-0.29.2.tar.gz
 		pushd pkg-config-0.29.2 > /dev/null
-		./configure --prefix=/tmp/pkg_config --with-internal-glib >> "/tmp/${NGTCP2_VERSION}.log" 2>&1
-		make -j${CORES} >> "/tmp/${NGTCP2_VERSION}.log" 2>&1
-		make install >> "/tmp/${NGTCP2_VERSION}.log" 2>&1
-		PATH=$PATH:/tmp/pkg_config/bin
+		./configure --prefix=${TMPDIR}/pkg_config --with-internal-glib >> "${TMPDIR}/${NGTCP2_VERSION}.log" 2>&1
+		make -j${CORES} >> "${TMPDIR}/${NGTCP2_VERSION}.log" 2>&1
+		make install >> "${TMPDIR}/${NGTCP2_VERSION}.log" 2>&1
+		PATH=$PATH:${TMPDIR}/pkg_config/bin
 		popd > /dev/null
 	fi
 
@@ -179,7 +179,7 @@ buildMac()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode"
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode"
 	export LDFLAGS="-arch ${ARCH}"
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig
 
 	if [[ $ARCH == "x86_64" ]]; then
 		TARGET="darwin64-x86_64-cc"
@@ -217,20 +217,20 @@ buildMac()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log"
 	if [[ $ARCH != ${BUILD_MACHINE} ]]; then
 		# cross compile required
 		if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-			./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+			./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log"
 		else
-			./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+			./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log"
 		fi
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" &> "/tmp/${NGTCP2_VERSION}-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Mac/${ARCH}" &> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log"
 	fi
-	make -j${CORES} >> "/tmp/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
-	make install >> "/tmp/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -252,7 +252,7 @@ buildCatalyst()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
     export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
     export LDFLAGS="-arch ${ARCH}"
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig
 
 	if [[ $ARCH == "x86_64" ]]; then
 		TARGET="darwin64-x86_64-cc"
@@ -293,18 +293,18 @@ buildCatalyst()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
 
 	# Cross compile required for Catalyst
 	if [[ "${ARCH}" == "arm64" ]]; then
-		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log"
 	fi
 
-	make -j${CORES} >> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make install >> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-catalyst-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -323,7 +323,7 @@ buildIOS()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="iPhoneSimulator"
@@ -344,18 +344,18 @@ buildIOS()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} ${CC_BITCODE_FLAG}"
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGTCP2}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j8 >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -374,7 +374,7 @@ buildIOSsim()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 
   	PLATFORM="iPhoneSimulator"
 	export $PLATFORM
@@ -401,18 +401,18 @@ buildIOSsim()
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${MIPHONEOS} ${CC_BITCODE_FLAG} ${RUNTARGET}  "
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j8 >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -430,7 +430,7 @@ buildTVOS()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
 
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="AppleTVSimulator"
@@ -446,7 +446,7 @@ buildTVOS()
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode"
 	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} ${NGTCP2LIB}"
 	export LC_CTYPE=C
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-tvOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-tvOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS ${TVOS_MIN_SDK_VERSION})"
 
@@ -457,15 +457,15 @@ buildTVOS()
 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	# chmod u+x ./Configure
 
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGTCP2}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log"
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
 
 	# add -isysroot to CC=
 	#sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 
-	make -j8 >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install  >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install  >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -483,7 +483,7 @@ buildTVOSsim()
 
 	pushd . > /dev/null
 	cd "${NGTCP2_VERSION}"
-	autoreconf -fi &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
 
 	PLATFORM="AppleTVSimulator"
 
@@ -497,7 +497,7 @@ buildTVOSsim()
 	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode ${RUNTARGET}"
 	export LDFLAGS="-arch ${ARCH} -isysroot ${SYSROOT} ${NGTCP2LIB}"
 	export LC_CTYPE=C
-	export PKG_CONFIG_PATH="/tmp/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig
+	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS Simulator ${TVOS_MIN_SDK_VERSION})"
 
@@ -509,9 +509,9 @@ buildTVOSsim()
 	# chmod u+x ./Configure
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGTCP2}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-simulator${ARCH}.log"
 	fi
 
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
@@ -519,9 +519,9 @@ buildTVOSsim()
 	# add -isysroot to CC=
 	#sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 
-	make -j8 >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install  >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install  >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGTCP2_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -546,8 +546,8 @@ mkdir -p iOS
 mkdir -p tvOS
 mkdir -p Catalyst
 
-rm -rf "/tmp/${NGTCP2_VERSION}-*"
-rm -rf "/tmp/${NGTCP2_VERSION}-*.log"
+rm -rf "${TMPDIR}/${NGTCP2_VERSION}-*"
+rm -rf "${TMPDIR}/${NGTCP2_VERSION}-*.log"
 
 rm -rf "${NGTCP2_VERSION}"
 
@@ -673,7 +673,7 @@ lipo \
 	-create -output "${NGTCP2}/lib/libngtcp2_crypto_openssl_tvOS-simulator.a"
 
 echo -e "${bold}Cleaning up${dim}"
-rm -rf /tmp/${NGTCP2_VERSION}-*
+rm -rf ${TMPDIR}/${NGTCP2_VERSION}-*
 rm -rf ${NGTCP2_VERSION}
 
 #reset trap

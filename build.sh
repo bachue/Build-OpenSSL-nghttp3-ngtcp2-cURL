@@ -422,10 +422,10 @@ echo
 # create universal Mac binaries and run test
 echo -e "${bold}Archiving Mac binaries for curl and openssl...${dim}"
 echo "  See $ARCHIVE/bin"
-lipo -create -output $ARCHIVE/bin/curl /tmp/curl-x86_64 /tmp/curl-arm64
-mv /tmp/curl-* $ARCHIVE/bin
-lipo -create -output $ARCHIVE/bin/openssl /tmp/openssl-x86_64 /tmp/openssl-arm64
-mv /tmp/openssl-* $ARCHIVE/bin
+lipo -create -output $ARCHIVE/bin/curl ${TMPDIR}/curl-x86_64 ${TMPDIR}/curl-arm64
+mv ${TMPDIR}/curl-* $ARCHIVE/bin
+lipo -create -output $ARCHIVE/bin/openssl ${TMPDIR}/openssl-x86_64 ${TMPDIR}/openssl-arm64
+mv ${TMPDIR}/openssl-* $ARCHIVE/bin
 echo
 echo -e "${bold}Testing Universal Mac binaries for ${BUILD_MACHINE}...${dim}"
 echo "  cURL"

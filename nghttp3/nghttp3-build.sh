@@ -30,7 +30,7 @@ alert="\033[0m${red}\033[1m"
 alertdim="\033[0m${red}\033[2m"
 
 # set trap to help debug build errors
-trap 'echo -e "${alert}** ERROR with Build - Check /tmp/nghttp3*.log${alertdim}"; tail -5 /tmp/nghttp3*.log' INT TERM EXIT
+trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/nghttp3*.log${alertdim}"; tail -5 ${TMPDIR}/nghttp3*.log' INT TERM EXIT
 
 # --- Edit this to update default version ---
 NGHTTP3_VERNUM="0.7.1"
@@ -149,10 +149,10 @@ else
 		echo "  Building pkg-config"
 		tar xfz pkg-config-0.29.2.tar.gz
 		pushd pkg-config-0.29.2 > /dev/null
-		./configure --prefix=/tmp/pkg_config --with-internal-glib >> "/tmp/${NGHTTP3_VERSION}.log" 2>&1
-		make -j${CORES} >> "/tmp/${NGHTTP3_VERSION}.log" 2>&1
-		make install >> "/tmp/${NGHTTP3_VERSION}.log" 2>&1
-		PATH=$PATH:/tmp/pkg_config/bin
+		./configure --prefix=${TMPDIR}/pkg_config --with-internal-glib >> "${TMPDIR}/${NGHTTP3_VERSION}.log" 2>&1
+		make -j${CORES} >> "${TMPDIR}/${NGHTTP3_VERSION}.log" 2>&1
+		make install >> "${TMPDIR}/${NGHTTP3_VERSION}.log" 2>&1
+		PATH=$PATH:${TMPDIR}/pkg_config/bin
 		popd > /dev/null
 	fi
 
@@ -211,20 +211,20 @@ buildMac()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log"
 	if [[ $ARCH != ${BUILD_MACHINE} ]]; then
 		# cross compile required
 		if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-			./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log"
+			./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log"
 		else
-			./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log"
+			./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log"
 		fi
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" &> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Mac/${ARCH}" &> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log"
 	fi
-	make -j${CORES} >> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
-	make install >> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -285,18 +285,18 @@ buildCatalyst()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
 
 	# Cross compile required for Catalyst
 	if [[ "${ARCH}" == "arm64" ]]; then
-		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Catalyst/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/Catalyst/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log"
 	fi
 
-	make -j${CORES} >> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make install >> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make -j${CORES} >> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make install >> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-catalyst-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -314,7 +314,7 @@ buildIOS()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="iPhoneSimulator"
@@ -338,14 +338,14 @@ buildIOS()
 
 	echo -e "${subbold}Building ${NGHTTP3_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-		./configure --disable-shared --enable-lib-only  --prefix="${NGHTTP3}/iOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure --disable-shared --enable-lib-only  --prefix="${NGHTTP3}/iOS/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+		./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/iOS/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j8 >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -363,7 +363,7 @@ buildIOSsim()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 
   	PLATFORM="iPhoneSimulator"
 	export $PLATFORM
@@ -393,14 +393,14 @@ buildIOSsim()
 
 	echo -e "${subbold}Building ${NGHTTP3_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
-	make -j8 >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make install >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make install >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -417,7 +417,7 @@ buildTVOS()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
 
 	if [[ "${ARCH}" == "i386" || "${ARCH}" == "x86_64" ]]; then
 		PLATFORM="AppleTVSimulator"
@@ -443,15 +443,15 @@ buildTVOS()
 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	# chmod u+x ./Configure
 
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
 
 	# add -isysroot to CC=
 	#sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 
-	make -j8 >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install  >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install  >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -468,7 +468,7 @@ buildTVOSsim()
 
 	pushd . > /dev/null
 	cd "${NGHTTP3_VERSION}"
-	autoreconf -fi &> "/tmp/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
+	autoreconf -fi &> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
 
 	PLATFORM="AppleTVSimulator"
 
@@ -493,9 +493,9 @@ buildTVOSsim()
 	# chmod u+x ./Configure
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "/tmp/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" &> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
 	fi
 
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
@@ -503,9 +503,9 @@ buildTVOSsim()
 	# add -isysroot to CC=
 	#sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 
-	make -j8 >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install  >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "/tmp/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j8 >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make install  >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make clean >> "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log" 2>&1
 	popd > /dev/null
 
 	# Clean up exports
@@ -529,8 +529,8 @@ mkdir -p iOS
 mkdir -p tvOS
 mkdir -p Catalyst
 
-rm -rf "/tmp/${NGHTTP3_VERSION}-*"
-rm -rf "/tmp/${NGHTTP3_VERSION}-*.log"
+rm -rf "${TMPDIR}/${NGHTTP3_VERSION}-*"
+rm -rf "${TMPDIR}/${NGHTTP3_VERSION}-*.log"
 
 rm -rf "${NGHTTP3_VERSION}"
 
@@ -618,7 +618,7 @@ lipo \
 	-create -output "${NGHTTP3}/lib/libnghttp3_tvOS-simulator.a"
 
 echo -e "${bold}Cleaning up${dim}"
-rm -rf /tmp/${NGHTTP3_VERSION}-*
+rm -rf ${TMPDIR}/${NGHTTP3_VERSION}-*
 rm -rf ${NGHTTP3_VERSION}
 
 #reset trap
