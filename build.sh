@@ -36,16 +36,6 @@ version_lte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
 }
 
-if [ -z "${MACOS_X86_64_VERSION}" ]; then
-	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
-fi
-if [ -z "${MACOS_ARM64_VERSION}" ]; then
-	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
-fi
-if version_lte $MACOS_ARM64_VERSION 11.0; then
-        MACOS_ARM64_VERSION="11.0"      # Min support for Apple Silicon is 11.0
-fi
-
 # Global flags
 engine=""
 buildnghttp3="-n"
@@ -153,8 +143,18 @@ while getopts "o:c:3:2:u:s:t:i:a:debmxh\?" o; do
 done
 shift $((OPTIND-1))
 
+if [ -z "${MACOS_X86_64_VERSION}" ]; then
+	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
+fi
+if [ -z "${MACOS_ARM64_VERSION}" ]; then
+	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
+fi
+if version_lte $MACOS_ARM64_VERSION 11.0; then
+	MACOS_ARM64_VERSION="11.0"      # Min support for Apple Silicon is 11.0
+fi
+
 # Set OS min versions
-OSARGS="-s ${IOS_MIN_SDK_VERSION} -t ${TVOS_MIN_SDK_VERSION} -i ${MACOS_X86_64_VERSION} -a ${MACOS_ARM64_VERSION}"
+OSARGS="-s '${IOS_MIN_SDK_VERSION}' -t '${TVOS_MIN_SDK_VERSION}' -i '${MACOS_X86_64_VERSION}' -a '${MACOS_ARM64_VERSION}'"
 
 ## Welcome
 echo -e "${bold}Build-OpenSSL-cURL${dim}"

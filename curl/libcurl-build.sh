@@ -50,13 +50,6 @@ TVOS_SDK_VERSION=""
 
 CORES=$(sysctl -n hw.ncpu)
 
-if [ -z "${MACOS_X86_64_VERSION}" ]; then
-	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
-fi
-if [ -z "${MACOS_ARM64_VERSION}" ]; then
-	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
-fi
-
 # Semantic Version Comparison
 version_lte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
@@ -135,6 +128,13 @@ while getopts "v:s:t:i:a:u:o:nmbxh\?" o; do
     esac
 done
 shift $((OPTIND-1))
+
+if [ -z "${MACOS_X86_64_VERSION}" ]; then
+	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
+fi
+if [ -z "${MACOS_ARM64_VERSION}" ]; then
+	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
+fi
 
 OPENSSL="${PWD}/../openssl"
 DEVELOPER=`xcode-select -print-path`

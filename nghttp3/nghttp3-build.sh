@@ -49,15 +49,6 @@ TVOS_SDK_VERSION=""
 
 CORES=$(sysctl -n hw.ncpu)
 
-if [ -z "${MACOS_X86_64_VERSION}" ]; then
-	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
-fi
-if [ -z "${MACOS_ARM64_VERSION}" ]; then
-	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
-fi
-
-CORES=$(sysctl -n hw.ncpu)
-
 usage ()
 {
 	echo
@@ -118,6 +109,13 @@ while getopts "v:s:t:i:a:u:mxh\?" o; do
     esac
 done
 shift $((OPTIND-1))
+
+if [ -z "${MACOS_X86_64_VERSION}" ]; then
+	MACOS_X86_64_VERSION=$(sw_vers -productVersion)
+fi
+if [ -z "${MACOS_ARM64_VERSION}" ]; then
+	MACOS_ARM64_VERSION=$(sw_vers -productVersion)
+fi
 
 NGHTTP3_VERSION="nghttp3-${NGHTTP3_VERNUM}"
 DEVELOPER=`xcode-select -print-path`
