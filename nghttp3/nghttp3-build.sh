@@ -12,7 +12,7 @@
 #
 # NOTE: pkg-config is required
 
-set -e
+set -ex
 
 # Formatting
 default="\033[39m"

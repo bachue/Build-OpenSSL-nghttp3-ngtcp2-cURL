@@ -5,7 +5,7 @@
 # Author: Jason Cox, @jasonacox https://github.com/jasonacox/Build-OpenSSL-cURL
 # Date: 2020-Aug-15
 
-set -e
+set -ex
 
 # Default Version
 VERSION="openssl-3.0.7"

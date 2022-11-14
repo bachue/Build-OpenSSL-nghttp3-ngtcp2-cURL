@@ -13,7 +13,7 @@
 # Preston Jennings
 #   https://github.com/prestonj/Build-OpenSSL-cURL
 
-set -e
+set -ex
 
 # Formatting
 default="\033[39m"
