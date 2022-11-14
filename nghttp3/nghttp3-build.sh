@@ -391,9 +391,9 @@ buildIOSsim()
 
 	echo -e "${subbold}Building ${NGHTTP3_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
 	if [[ "${ARCH}" == "arm64" || "${ARCH}" == "arm64e"  ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
+	./configure --disable-shared --enable-lib-only --prefix="${NGHTTP3}/iOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
 	fi
 
 	make -j8 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-iOS-${ARCH}-${BITCODE}.log"
@@ -441,7 +441,7 @@ buildTVOS()
 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	# chmod u+x ./Configure
 
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
+	./configure --disable-shared --enable-lib-only  --prefix="${NGHTTP3}/tvOS/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-${ARCH}.log"
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
 
 	# add -isysroot to CC=
@@ -491,9 +491,9 @@ buildTVOSsim()
 	# chmod u+x ./Configure
 
 	if [[ "${ARCH}" == "arm64" ]]; then
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="arm-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
 	else
-	./configure --disable-shared --disable-app --disable-threads --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
+	./configure --disable-shared --enable-lib-only  --prefix="${NGHTTP3}/tvOS-simulator/${ARCH}" --host="${ARCH}-apple-darwin" 2>&1 | tee -a "${TMPDIR}/${NGHTTP3_VERSION}-tvOS-simulator${ARCH}.log"
 	fi
 
 	LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "config.h"
