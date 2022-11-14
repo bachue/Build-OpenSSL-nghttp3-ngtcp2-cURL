@@ -175,8 +175,8 @@ buildMac()
 	TARGET="darwin-i386-cc"
 	BUILD_MACHINE=`uname -m`
 	export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode"
-	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode"
-	export LDFLAGS="-arch ${ARCH}"
+	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode "
+	export LDFLAGS="-Wl,-dead_strip -arch ${ARCH}"
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Mac/${ARCH}"/lib/pkgconfig
 
 	if [[ $ARCH == "x86_64" ]]; then
@@ -186,12 +186,12 @@ buildMac()
    			# Apple ARM Silicon Build Machine Detected - cross compile
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode  "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		else
 			# Apple x86_64 Build Machine Detected - native build
-			export CFLAGS=" -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode"
+			export CFLAGS=" -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode  "
 		fi
 	fi
 	if [[ $ARCH == "arm64" ]]; then
@@ -199,15 +199,15 @@ buildMac()
 		MACOS_VER="${MACOS_ARM64_VERSION}"
 		if [ ${BUILD_MACHINE} == 'arm64' ]; then
    			# Apple ARM Silicon Build Machine Detected
-			export CFLAGS=" -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode"
+			export CFLAGS=" -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode  "
 		else
 			# Apple x86_64 Build Machine Detected - cross compile
 			TARGET="darwin64-arm64-cc"
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode  "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		fi
 	fi
 
@@ -248,8 +248,8 @@ buildCatalyst()
 	BUILD_MACHINE=`uname -m`
 
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
-    export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
-    export LDFLAGS="-arch ${ARCH}"
+    export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+    export LDFLAGS="-Wl,-dead_strip -arch ${ARCH}"
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-catalyst-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/Catalyst/${ARCH}"/lib/pkgconfig
 
 	if [[ $ARCH == "x86_64" ]]; then
@@ -261,12 +261,12 @@ buildCatalyst()
 			MACOS_VER="${MACOS_X86_64_VERSION}"
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk   "
 		else
 			# Apple x86_64 Build Machine Detected - native build
-			export CFLAGS=" -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export CFLAGS=" -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
 		fi
 	fi
 	if [[ $ARCH == "arm64" ]]; then
@@ -275,15 +275,15 @@ buildCatalyst()
 		if [ ${BUILD_MACHINE} == 'arm64' ]; then
    			# Apple ARM Silicon Build Machine Detected - native build
 			TARGET="darwin64-arm64-cc"
-			export CFLAGS=" -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export CFLAGS=" -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
 		else
 			# Apple x86_64 Build Machine Detected - cross compile
 			TARGET="darwin64-arm64-cc"
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -gdwarf-2 -fembed-bitcode   -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		fi
 	fi
 
@@ -340,8 +340,8 @@ buildIOS()
 	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	export BUILD_TOOLS="${DEVELOPER}"
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
-	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} ${CC_BITCODE_FLAG}"
-	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
+	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} ${CC_BITCODE_FLAG}  "
+	export LDFLAGS="-Wl,-dead_strip -arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-iOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
@@ -397,8 +397,8 @@ buildIOSsim()
 	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	export BUILD_TOOLS="${DEVELOPER}"
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
-	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${MIPHONEOS} ${CC_BITCODE_FLAG} ${RUNTARGET}  "
-	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
+	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${MIPHONEOS} ${CC_BITCODE_FLAG}  ${RUNTARGET}  "
+	export LDFLAGS="-Wl,-dead_strip -arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK}"
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-iOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/iOS-simulator/${ARCH}"/lib/pkgconfig
 
 	echo -e "${subbold}Building ${NGTCP2_VERSION} for ${PLATFORM} ${IOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${IOS_MIN_SDK_VERSION})"
@@ -441,8 +441,8 @@ buildTVOS()
 	export CROSS_SDK="${PLATFORM}${TVOS_SDK_VERSION}.sdk"
 	export BUILD_TOOLS="${DEVELOPER}"
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
-	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode"
-	export LDFLAGS="-arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} ${NGTCP2LIB}"
+	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode "
+	export LDFLAGS="-Wl,-dead_strip -arch ${ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} ${NGTCP2LIB}"
 	export LC_CTYPE=C
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-tvOS-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS/${ARCH}"/lib/pkgconfig
 
@@ -492,8 +492,8 @@ buildTVOSsim()
 	export SYSROOT=$(xcrun --sdk appletvsimulator --show-sdk-path)
 	export BUILD_TOOLS="${DEVELOPER}"
 	export CC="${BUILD_TOOLS}/usr/bin/gcc"
-	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode ${RUNTARGET}"
-	export LDFLAGS="-arch ${ARCH} -isysroot ${SYSROOT} ${NGTCP2LIB}"
+	export CFLAGS="-arch ${ARCH} -pipe -Os -gdwarf-2 -isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} -fembed-bitcode  ${RUNTARGET}"
+	export LDFLAGS="-Wl,-dead_strip -arch ${ARCH} -isysroot ${SYSROOT} ${NGTCP2LIB}"
 	export LC_CTYPE=C
 	export PKG_CONFIG_PATH="${TMPDIR}/openssl-${OPENSSL_VERNUM}-tvOS-Simulator-${ARCH}"/lib/pkgconfig:"${PWD}/../nghttp3/tvOS-simulator/${ARCH}"/lib/pkgconfig
 

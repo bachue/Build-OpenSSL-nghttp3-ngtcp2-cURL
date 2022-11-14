@@ -140,12 +140,12 @@ buildMac()
    			# Apple ARM Silicon Build Machine Detected - cross compile
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH}  "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		else
 			# Apple x86_64 Build Machine Detected - native build
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH}  "
 		fi
 	fi
 	if [[ $ARCH == "arm64" ]]; then
@@ -154,14 +154,14 @@ buildMac()
 		if [ ${BUILD_MACHINE} == 'arm64' ]; then
    			# Apple ARM Silicon Build Machine Detected - native build
 			export CC="${BUILD_TOOLS}/usr/bin/gcc"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH}  "
 		else
 			# Apple x86_64 Build Machine Detected - cross compile
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH}  "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		fi
 	fi
 
@@ -213,12 +213,12 @@ buildCatalyst()
    			# Apple ARM Silicon Build Machine Detected - cross compile
 			export CC="clang"
 			export CXX="clang"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		else
 			# Apple x86_64 Build Machine Detected - native build
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_X86_64_VERSION} -arch ${ARCH} -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
 		fi
 	fi
 	if [[ $ARCH == "arm64" ]]; then
@@ -227,12 +227,12 @@ buildCatalyst()
 		if [ ${BUILD_MACHINE} == 'arm64' ]; then
    			# Apple ARM Silicon Build Machine Detected - native build
 			export CC="${BUILD_TOOLS}/usr/bin/gcc"
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
 		else
 			# Apple x86_64 Build Machine Detected - cross compile
-			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -fembed-bitcode -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
-			export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
-			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CFLAGS=" -Os -mmacosx-version-min=${MACOS_ARM64_VERSION} -arch ${ARCH} -fembed-bitcode  -target ${ARCH}-apple-ios${CATALYST_IOS}-macabi "
+			export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk "
+			export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  "
 		fi
 	fi
 
@@ -330,9 +330,9 @@ buildTVOSsim()
 	export LC_CTYPE=C
 
 
-	export CFLAGS=" -Os -fembed-bitcode -arch ${ARCH} ${RUNTARGET} "
-	export LDFLAGS=" -arch ${ARCH} -isysroot ${SYSROOT}"
-	export CPPFLAGS=" -I.. -isysroot ${SYSROOT}"
+	export CFLAGS=" -Os -fembed-bitcode  -arch ${ARCH} ${RUNTARGET} "
+	export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${SYSROOT}"
+	export CPPFLAGS=" -I.. -isysroot ${SYSROOT}  "
 	export CXX="${BUILD_TOOLS}/usr/bin/gcc"
 
 	echo -e "${subbold} Building ${OPENSSL_VERSION} for ${PLATFORM} ${TVOS_SDK_VERSION} ${archbold}${ARCH}${dim} (tvOS Simulator ${TVOS_MIN_SDK_VERSION})"

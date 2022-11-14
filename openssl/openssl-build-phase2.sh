@@ -201,9 +201,9 @@ buildIOSsim()
 	fi
 
 	# set up exports for build
-	export CFLAGS=" -Os -miphoneos-version-min=${MIPHONEOS} -fembed-bitcode -arch ${ARCH} ${RUNTARGET} "
-	export LDFLAGS=" -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk "
-	export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk "
+	export CFLAGS=" -Os -miphoneos-version-min=${MIPHONEOS} -fembed-bitcode  -arch ${ARCH} ${RUNTARGET} "
+	export LDFLAGS=" -Wl,-dead_strip -arch ${ARCH} -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk "
+	export CPPFLAGS=" -I.. -isysroot ${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk  "
 	export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
 	export CROSS_SDK="${PLATFORM}${IOS_SDK_VERSION}.sdk"
 	export BUILD_TOOLS="${DEVELOPER}"
