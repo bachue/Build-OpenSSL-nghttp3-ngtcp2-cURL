@@ -95,7 +95,7 @@ usage ()
 }
 
 # Process command line arguments
-while getopts "o:c:n:u:s:t:i:a:debm3xh\?" o; do
+while getopts "o:c:3:2:u:s:t:i:a:debmxh\?" o; do
     case "${o}" in
 		o)
 			OPENSSL="${OPTARG}"
