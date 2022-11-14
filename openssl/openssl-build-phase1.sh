@@ -173,16 +173,16 @@ buildMac()
 	pushd . > /dev/null
 	cd "${OPENSSL_VERSION}"
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3."* ]]; then
-		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
+		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
+		./Configure no-asm ${TARGET} -no-shared no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	fi
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	# Keep openssl binary for Mac version
 	cp "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "${TMPDIR}/openssl-${ARCH}"
 	cp "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}/bin/openssl" "${TMPDIR}/openssl"
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log" 2>&1
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	popd > /dev/null
 
 	if [ $ARCH == ${BUILD_MACHINE} ]; then
@@ -246,9 +246,9 @@ buildCatalyst()
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${archbold}${ARCH}${dim} (MacOS ${MACOS_VER} Catalyst iOS ${CATALYST_IOS})"
 
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode enable-tls1_3 --prefix="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode enable-tls1_3 --prefix="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 	fi
 
 	#if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
@@ -257,9 +257,9 @@ buildCatalyst()
 	#	sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} !" "Makefile"
 	#fi
 
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 	popd > /dev/null
 
 	# Clean up exports
@@ -309,16 +309,16 @@ buildTVOS()
 
 	if [[ "${ARCH}" == "x86_64" ]]; then
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		else
-			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure no-asm darwin64-x86_64-cc no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		fi
 	else
 		export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode -arch ${ARCH}"
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		else
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 		fi
 	fi
 	# add -isysroot to CC=
@@ -328,9 +328,9 @@ buildTVOS()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 	popd > /dev/null
 
 	# Clean up exports
@@ -380,9 +380,9 @@ buildTVOSsim()
 	chmod u+x ./Configure
 
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm  ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+		./Configure no-asm  ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 	else
-		./Configure no-asm no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+		./Configure no-asm no-module no-legacy enable-tls1_3 --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 	fi
 
 	# add -isysroot to CC=
@@ -392,9 +392,9 @@ buildTVOSsim()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 	popd > /dev/null
 
 	# Clean up exports

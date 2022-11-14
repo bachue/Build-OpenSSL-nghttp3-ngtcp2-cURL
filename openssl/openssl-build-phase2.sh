@@ -155,16 +155,16 @@ buildIOS()
 			TARGET="darwin64-x86_64-cc"
 		fi
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
-			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		fi
 	else
 		if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
 			# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		else
-			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+			./Configure iphoneos-cross no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 		fi
 	fi
 	# add -isysroot to CC=
@@ -174,9 +174,9 @@ buildIOS()
 		sed -ie "s!^CFLAG=!CFLAG=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
 	fi
 
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	popd > /dev/null
 
 	# Clean up exports
@@ -229,9 +229,9 @@ buildIOSsim()
 
 	# configure
 	if [[ "$OPENSSL_VERSION" = "openssl-1.1.1"* ]] || [[ "$OPENSSL_VERSION" = "openssl-3"* ]]; then
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	else
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG &> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	fi
 
 	# add -isysroot to CC=
@@ -243,9 +243,9 @@ buildIOSsim()
 	#fi
 
 	# make
-	make -j${CORES} >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
-	make install_sw >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
-	make clean >> "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log" 2>&1
+	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+	make clean 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 	popd > /dev/null
 
 	# Clean up exports
