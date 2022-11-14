@@ -8,9 +8,6 @@
 
 set -ex
 
-# Custom build options
-CUSTOMCONFIG="enable-ssl-trace"
-
 # Formatting
 default="\033[39m"
 wihte="\033[97m"
@@ -154,10 +151,10 @@ buildIOS()
 		if [[ $ARCH == "x86_64" ]]; then
 			TARGET="darwin64-x86_64-cc"
 		fi
-		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+		./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	else
 		# export CC="${BUILD_TOOLS}/usr/bin/gcc -arch ${ARCH}"
-		./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
+		./Configure iphoneos-cross no-module no-legacy enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-${ARCH}.log"
 	fi
 	# add -isysroot to CC=
 	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -miphoneos-version-min=${IOS_MIN_SDK_VERSION} !" "Makefile"
@@ -216,7 +213,7 @@ buildIOSsim()
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${PLATFORM} ${iOS_SDK_VERSION} ${archbold}${ARCH}${dim} (iOS ${MIPHONEOS})"
 
 	# configure
-	./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" $CUSTOMCONFIG 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
+	./Configure no-asm ${TARGET} no-module no-legacy enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-iOS-Simulator-${ARCH}.log"
 
 	# add -isysroot to CC=
 	# no longer needed with exports
