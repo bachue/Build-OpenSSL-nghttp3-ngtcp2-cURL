@@ -169,7 +169,7 @@ buildMac()
 
 	pushd . > /dev/null
 	cd "${OPENSSL_VERSION}"
-	./Configure no-asm ${TARGET} -no-shared no-module no-legacy ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
+	./Configure no-asm ${TARGET} -no-shared no-module no-legacy no-acvp-tests no-blake2 no-camellia no-cmac no-dh no-dsa no-ecdh no-ecdsa no-md4 no-mdc2 no-rmd160 no-siphash no-sm2 no-sm3 no-whirlpool no-asan no-fips no-makedepend no-ssl-trace no-tests no-ui-console no-unit-test no-weak-ssl-ciphers no-ssl no-tls1 no-tls1_1 no-tls1_2 no-dtls no-buildtest-c++ no-uplink no-crypto-mdebug no-crypto-mdebug-backtrace no-capieng no-dynamic-engine no-external-tests no-fuzz-libfuzzer no-fuzz-afl no-srtp no-sse2 no-ubsan no-ssl3-method no-tls1-method no-tls1_1-method no-tls1_2-method no-dtls1-method no-dtls1_2-method no-md2 no-rc5 no-aria no-bf no-cast no-idea no-ocb no-rc2 no-rc4 no-scrypt no-seed no-siv no-sm4 ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	make install_sw 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-${ARCH}.log"
 	# Keep openssl binary for Mac version
@@ -238,7 +238,7 @@ buildCatalyst()
 
 	echo -e "${subbold}Building ${OPENSSL_VERSION} for ${archbold}${ARCH}${dim} (MacOS ${MACOS_VER} Catalyst iOS ${CATALYST_IOS})"
 
-	./Configure no-asm ${TARGET} no-module no-legacy ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
+	./Configure no-asm ${TARGET} no-module no-legacy no-acvp-tests no-blake2 no-camellia no-cmac no-dh no-dsa no-ecdh no-ecdsa no-md4 no-mdc2 no-rmd160 no-siphash no-sm2 no-sm3 no-whirlpool no-asan no-fips no-makedepend no-ssl-trace no-tests no-ui-console no-unit-test no-weak-ssl-ciphers no-ssl no-tls1 no-tls1_1 no-tls1_2 no-dtls no-buildtest-c++ no-uplink no-crypto-mdebug no-crypto-mdebug-backtrace no-capieng no-dynamic-engine no-external-tests no-fuzz-libfuzzer no-fuzz-afl no-srtp no-sse2 no-ubsan no-ssl3-method no-tls1-method no-tls1_1-method no-tls1_2-method no-dtls1-method no-dtls1_2-method no-md2 no-rc5 no-aria no-bf no-cast no-idea no-ocb no-rc2 no-rc4 no-scrypt no-seed no-siv no-sm4 ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-catalyst-${ARCH}.log"
 
 	# sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} !" "Makefile"
 
@@ -291,10 +291,10 @@ buildTVOS()
 	chmod u+x ./Configure
 
 	if [[ "${ARCH}" == "x86_64" ]]; then
-		./Configure no-asm darwin64-x86_64-cc no-module no-legacy ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+		./Configure no-asm darwin64-x86_64-cc no-module no-legacy no-acvp-tests no-blake2 no-camellia no-cmac no-dh no-dsa no-ecdh no-ecdsa no-md4 no-mdc2 no-rmd160 no-siphash no-sm2 no-sm3 no-whirlpool no-asan no-fips no-makedepend no-ssl-trace no-tests no-ui-console no-unit-test no-weak-ssl-ciphers no-ssl no-tls1 no-tls1_1 no-tls1_2 no-dtls no-buildtest-c++ no-uplink no-crypto-mdebug no-crypto-mdebug-backtrace no-capieng no-dynamic-engine no-external-tests no-fuzz-libfuzzer no-fuzz-afl no-srtp no-sse2 no-ubsan no-ssl3-method no-tls1-method no-tls1_1-method no-tls1_2-method no-dtls1-method no-dtls1_2-method no-md2 no-rc5 no-aria no-bf no-cast no-idea no-ocb no-rc2 no-rc4 no-scrypt no-seed no-siv no-sm4 ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 	else
 		export CC="${BUILD_TOOLS}/usr/bin/gcc -fembed-bitcode -arch ${ARCH}"
-		./Configure iphoneos-cross no-module no-legacy ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
+		./Configure iphoneos-cross no-module no-legacy no-acvp-tests no-blake2 no-camellia no-cmac no-dh no-dsa no-ecdh no-ecdsa no-md4 no-mdc2 no-rmd160 no-siphash no-sm2 no-sm3 no-whirlpool no-asan no-fips no-makedepend no-ssl-trace no-tests no-ui-console no-unit-test no-weak-ssl-ciphers no-ssl no-tls1 no-tls1_1 no-tls1_2 no-dtls no-buildtest-c++ no-uplink no-crypto-mdebug no-crypto-mdebug-backtrace no-capieng no-dynamic-engine no-external-tests no-fuzz-libfuzzer no-fuzz-afl no-srtp no-sse2 no-ubsan no-ssl3-method no-tls1-method no-tls1_1-method no-tls1_2-method no-dtls1-method no-dtls1_2-method no-md2 no-rc5 no-aria no-bf no-cast no-idea no-ocb no-rc2 no-rc4 no-scrypt no-seed no-siv no-sm4 ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 DSO_LDFLAGS=-fembed-bitcode --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" -no-shared --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-${ARCH}.log"
 	fi
 	# add -isysroot to CC=
 	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
@@ -348,7 +348,7 @@ buildTVOSsim()
 	LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
 	chmod u+x ./Configure
 
-	./Configure no-asm  ${TARGET} no-module no-legacy ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
+	./Configure no-asm  ${TARGET} no-module no-legacy no-acvp-tests no-blake2 no-camellia no-cmac no-dh no-dsa no-ecdh no-ecdsa no-md4 no-mdc2 no-rmd160 no-siphash no-sm2 no-sm3 no-whirlpool no-asan no-fips no-makedepend no-ssl-trace no-tests no-ui-console no-unit-test no-weak-ssl-ciphers no-ssl no-tls1 no-tls1_1 no-tls1_2 no-dtls no-buildtest-c++ no-uplink no-crypto-mdebug no-crypto-mdebug-backtrace no-capieng no-dynamic-engine no-external-tests no-fuzz-libfuzzer no-fuzz-afl no-srtp no-sse2 no-ubsan no-ssl3-method no-tls1-method no-tls1_1-method no-tls1_2-method no-dtls1-method no-dtls1_2-method no-md2 no-rc5 no-aria no-bf no-cast no-idea no-ocb no-rc2 no-rc4 no-scrypt no-seed no-siv no-sm4 ${EXTRA_OPENSSL_CONFIGURE_OPTS} enable-tls1_3 -no-shared --prefix="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" --openssldir="${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}" 2>&1 | tee -a "${TMPDIR}/${OPENSSL_VERSION}-tvOS-Simulator-${ARCH}.log"
 
 	# add -isysroot to CC=
 	sed -ie "s!^CFLAGS=!CFLAGS=-isysroot ${SYSROOT} -mtvos-version-min=${TVOS_MIN_SDK_VERSION} !" "Makefile"
