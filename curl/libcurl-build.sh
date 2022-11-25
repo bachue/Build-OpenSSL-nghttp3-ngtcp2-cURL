@@ -34,7 +34,8 @@ alertdim="\033[0m${red}\033[2m"
 trap 'echo -e "${alert}** ERROR with Build - Check ${TMPDIR}/curl*.log${alertdim}"; tail -3 ${TMPDIR}/curl*.log' INT TERM EXIT
 
 # Set defaults
-CURL_VERSION="curl-7.86.0"
+CURL_VERNUM="7.86.0"
+CURL_VERSION="curl-${CURL_VERNUM}"
 OPENSSL_VERNUM="3.0.7+quic"
 nohttp3="0"
 catalyst="0"
@@ -83,7 +84,8 @@ usage ()
 while getopts "v:s:t:i:a:u:o:nmbxh\?" o; do
     case "${o}" in
         v)
-			CURL_VERSION="curl-${OPTARG}"
+			CURL_VERNUM="${OPTARG}"
+			CURL_VERSION="curl-${CURL_VERNUM}"
             ;;
 		s)
 			IOS_MIN_SDK_VERSION="${OPTARG}"
@@ -250,6 +252,7 @@ buildMac()
 
 	pushd . > /dev/null
 	cd "${CURL_VERSION}"
+	autoreconf -fi 2>&1 | tee -a "${TMPDIR}/${CURL_VERSION}-${ARCH}.log"
 	./configure -prefix="${TMPDIR}/${CURL_VERSION}-${ARCH}" --disable-shared --enable-static --disable-headers-api -with-random=/dev/urandom --with-ssl=${OPENSSL}/Mac ${NGHTTP3CFG} ${NGTCP2CFG} --host=${HOST} --enable-optimize --disable-ftp --disable-file --disable-ldap --disable-ldaps --disable-rtsp --disable-dict --disable-telnet --disable-tftp --disable-pop3 --disable-imap --disable-smb --disable-smtp --disable-gopher --disable-mqtt --disable-ipv6 --disable-sspi --disable-cookies --disable-progress-meter --enable-dnsshuffle --disable-alt-svc --disable-hsts --without-librtmp --without-libidn2 --without-hyper 2>&1 | tee -a "${TMPDIR}/${CURL_VERSION}-${ARCH}.log"
 
 	make -j${CORES} 2>&1 | tee -a "${TMPDIR}/${CURL_VERSION}-${ARCH}.log"
@@ -520,14 +523,23 @@ rm -rf "${CURL_VERSION}"
 
 if [ ! -e ${CURL_VERSION}.tar.gz ]; then
 	echo "Downloading ${CURL_VERSION}.tar.gz"
-	curl -Ls -o "${CURL_VERSION}.tar.gz.tmp" https://curl.haxx.se/download/${CURL_VERSION}.tar.gz
+	curl -Ls -o "${CURL_VERSION}.tar.gz.tmp" https://github.com/bachue/curl/archive/refs/heads/v${CURL_VERNUM}/quiche/send_ping.tar.gz
 	mv "${CURL_VERSION}.tar.gz.tmp" "${CURL_VERSION}.tar.gz"
 else
 	echo "Using ${CURL_VERSION}.tar.gz"
 fi
 
 echo "Unpacking curl"
-tar xfz "${CURL_VERSION}.tar.gz"
+rm -rf ${TMPDIR}/curl-extract
+mkdir -p ${TMPDIR}/curl-extract
+cwd="$(pwd)"
+pushd . > /dev/null
+cd ${TMPDIR}/curl-extract
+tar xfz "$cwd/${CURL_VERSION}.tar.gz"
+unset cwd
+popd > /dev/null
+mv ${TMPDIR}/curl-extract/curl-* "${CURL_VERSION}"
+rm -rf ${TMPDIR}/curl-extract
 
 echo -e "${bold}Building Mac libraries${dim}"
 buildMac "x86_64"

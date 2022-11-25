@@ -551,14 +551,23 @@ rm -rf "${NGTCP2_VERSION}"
 
 if [ ! -e ${NGTCP2_VERSION}.tar.gz ]; then
 	echo "Downloading ${NGTCP2_VERSION}.tar.gz"
-	curl -Ls -o "${NGTCP2_VERSION}.tar.gz.tmp" https://github.com/ngtcp2/ngtcp2/archive/refs/tags/v${NGTCP2_VERNUM}.tar.gz
+	curl -Ls -o "${NGTCP2_VERSION}.tar.gz.tmp" https://github.com/bachue/ngtcp2/archive/refs/heads/v${NGTCP2_VERNUM}/features/do-ping.tar.gz
 	mv "${NGTCP2_VERSION}.tar.gz.tmp" "${NGTCP2_VERSION}.tar.gz"
 else
 	echo "Using ${NGTCP2_VERSION}.tar.gz"
 fi
 
 echo "Unpacking ngtcp2"
-tar xfz "${NGTCP2_VERSION}.tar.gz"
+rm -rf ${TMPDIR}/ngtcp2-extract
+mkdir -p ${TMPDIR}/ngtcp2-extract
+cwd="$(pwd)"
+pushd . > /dev/null
+cd ${TMPDIR}/ngtcp2-extract
+tar xfz "$cwd/${NGTCP2_VERSION}.tar.gz"
+unset cwd
+popd > /dev/null
+mv ${TMPDIR}/ngtcp2-extract/ngtcp2-* "${NGTCP2_VERSION}"
+rm -rf ${TMPDIR}/ngtcp2-extract
 
 echo -e "${bold}Building Mac libraries${dim}"
 buildMac "x86_64"
